@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>المنصة الأمنية المتكاملة</title>
+    <!-- استدعاء مكتبة توليد الـ QR Code الخارجية -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root {
             --bg-dark: #fafafa;
@@ -214,6 +216,31 @@
             display: block;
             margin: 15px auto 0 auto;
         }
+
+        /* تنسيق قسم الـ QR Code الجديد */
+        .qr-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px dashed var(--border-color);
+        }
+        .qr-section p {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        #qrcode {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+        }
     </style>
 </head>
 <body>
@@ -325,7 +352,7 @@
         </div>
     </div>
 
-    <!-- ================= الصفحة الثالثة: Steganography المستقرة تماماً ================= -->
+    <!-- ================= الصفحة الثالثة ================= -->
     <div id="stegoPage" class="page-content">
         <div class="sub-menu">
             <button id="subBtnStegoEncrypt" class="sub-btn active" onclick="switchStegoSubMode('stegoEncryptMode')">Encrypt (إخفاء)</button>
@@ -365,9 +392,28 @@
         </div>
     </div>
 
+    <!-- ================= قسم الـ QR Code الجديد أسفل المنصة ================= -->
+    <div class="qr-section">
+        <p>امسح الـ QR Code لمشاركة وزيارة هذه المنصة عبر الجوال:</p>
+        <div id="qrcode"></div>
+    </div>
+
 </div>
 
 <script>
+    // عند تحميل الصفحة، يتم التعرف على الرابط الحالي وتوليد الـ QR Code تلقائياً
+    window.addEventListener('DOMContentLoaded', (event) => {
+        const currentUrl = window.location.href;
+        new QRCode(document.getElementById("qrcode"), {
+            text: currentUrl,
+            width: 140,
+            height: 140,
+            colorDark : "#1a1c3b",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+    });
+
     function switchPage(pageId) {
         document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -401,7 +447,6 @@
         if (type === 'vigenere') document.getElementById('keyLabel' + suffix).innerText = "أدخل المفتاح (نص):";
     }
 
-    // معالجة معززة تضمن تحميل كامل بيانات وأبعاد الصورة قبل استخدامها
     function handleImage(e, canvasId) {
         if(!e.target.files[0]) return;
         const reader = new FileReader();
@@ -409,7 +454,7 @@
             const img = new Image();
             img.onload = async function() {
                 if ('decode' in img) {
-                    await img.decode(); // إجبار المتصفح على الانتظار حتى فك تشفير أبعاد الصورة تماماً في الذاكرة
+                    await img.decode();
                 }
                 const canvas = document.getElementById(canvasId);
                 const ctx = canvas.getContext('2d');
@@ -423,7 +468,6 @@
         reader.readAsDataURL(e.target.files[0]);
     }
 
-    // دالة الإخفاء المحدثة
     function hideMessage() {
         const canvas = document.getElementById('stegoCanvasEnc');
         if (canvas.width === 0) { alert("يرجى رفع صورة أولاً."); return; }
@@ -434,7 +478,6 @@
         let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         let data = imgData.data;
 
-        // ترميز اللغة العربية والإنجليزية بـ UTF-8
         const encoder = new TextEncoder();
         const u8Array = encoder.encode(msg);
 
@@ -443,7 +486,6 @@
             bitString += u8Array[i].toString(2).padStart(8, '0');
         }
         
-        // راية نهاية نص مخصصة وقوية (32 بت صفرية) لمنع التداخل
         bitString += "00000000000000000000000000000000"; 
 
         if (bitString.length > data.length * 0.75) {
@@ -453,7 +495,7 @@
 
         let bitIndex = 0;
         for (let i = 0; i < data.length; i++) {
-            if (i % 4 === 3) continue; // تخطي الـ Alpha للحفاظ على الشفافية والألوان الأساسية
+            if (i % 4 === 3) continue;
             if (bitIndex < bitString.length) {
                 data[i] = (data[i] & 0xFE) | parseInt(bitString[bitIndex]);
                 bitIndex++;
@@ -468,7 +510,6 @@
         link.click();
     }
 
-    // دالة الاستخراج المحدثة والمستقرة تماماً
     function revealMessage() {
         const canvas = document.getElementById('stegoCanvasDec');
         if (canvas.width === 0) { alert("يرجى رفع الصورة المستهدفة أولاً."); return; }
@@ -488,7 +529,6 @@
             let byteStr = bitString.substr(i, 8);
             if (byteStr.length < 8) break;
             
-            // التوقف الذكي الفوري عند قراءة راية النهاية الصفرية الممتدة
             if (byteStr === "00000000") {
                 if (bitString.substr(i, 32) === "00000000000000000000000000000000") {
                     break;
@@ -508,7 +548,6 @@
         }
     }
 
-    // دالات التشفير التقليدي
     function processCipher(isEncrypt) {
         const suffix = isEncrypt ? 'Enc' : 'Dec';
         const type = document.getElementById('cipherSelect' + suffix).value;
@@ -597,7 +636,8 @@
             bar.style.width = "0%"; feedback.innerText = "أدخل كلمة سر للتحليل الفوري..."; badge.innerText = "0/100"; return;
         }
 
-        let a = 0, b = 0, c = 60, d = 0, e = 0, f = 0, g = 0, h = 0, j = 0;
+        let a = 0, b = 0, c = 60;
+        let d = 0, e = 0, f = 0, g = 0, h = 0, j = 0;
         if (p.length <= 8) { c -= 20; } 
         else if (p.length >= 16) { c += 20; } 
         else if (p.length < 12) { c -= 10; } 
@@ -645,7 +685,7 @@
 
         badge.innerText = c + "/100"; bar.style.width = c + "%";
 
-        if (c >= 90) { feedback.innerText = "ممتازة جداً! كلمة المرور قوية للغاية وتصعب مهاجمتها. 💪"; bar.style.backgroundColor = "#22c55e"; } 
+        if (c >= 90) { feedback.innerText = "ممتازة جداً! كلمة المرور قوية للغاية وتصعم مهاجمتها. 💪"; bar.style.backgroundColor = "#22c55e"; } 
         else if (c >= 75) { feedback.innerText = "جيدة! كلمة مرور قوية ولكن يمكن تحسينها بإضافة رموز."; bar.style.backgroundColor = "#3b82f6"; } 
         else if (c >= 50) { feedback.innerText = "متوسطة القوة، يُنصح بتجنب التكرار وزيادة الطول."; bar.style.backgroundColor = "#f59e0b"; } 
         else { feedback.innerText = "ضعيفة جداً! يسهل تخمينها، يرجى تغييرها فوراً."; bar.style.backgroundColor = "#ef4444"; }
