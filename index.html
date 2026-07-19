@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المنصة الأمنية المتكاملة</title>
+    <style>
+        :root {
+            --bg-dark: #fafafa;
+            --panel-bg: #ffffff;
+            --accent-purple: #5345ed; 
+            --text-main: #1e1e24;
+            --text-muted: #65676b;
+            --border-color: #e4e6eb;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            padding: 40px 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .nav-menu {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            background-color: transparent;
+            color: #1a1c3b;
+            padding: 12px 24px;
+            border: 2px solid #dbdee3;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            border-color: var(--accent-purple);
+        }
+
+        .nav-btn.active {
+            background-color: var(--accent-purple);
+            color: #ffffff;
+            border-color: var(--accent-purple);
+        }
+
+        .sub-menu {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .sub-btn {
+            background-color: transparent;
+            color: var(--text-muted);
+            padding: 8px 22px;
+            border: 2px solid #dbdee3;
+            border-radius: 30px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .sub-btn.active {
+            background-color: #eef2ff;
+            color: var(--accent-purple);
+            border-color: var(--accent-purple);
+        }
+
+        .page-content, .sub-content {
+            display: none;
+        }
+
+        .page-content.active, .sub-content.active {
+            display: block;
+        }
+
+        .card {
+            background-color: var(--panel-bg);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+            margin-bottom: 25px;
+        }
+
+        .card h2 {
+            margin-bottom: 25px;
+            color: #1a1c3b;
+            font-size: 1.3rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 12px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        input[type="text"], input[type="number"], input[type="password"], textarea, select, input[type="file"] {
+            width: 100%;
+            padding: 14px;
+            background-color: #f5f6f8;
+            border: 1px solid transparent;
+            border-radius: 10px;
+            color: var(--text-main);
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            background-color: #ffffff;
+            border-color: var(--accent-purple);
+            box-shadow: 0 0 0 4px rgba(83, 69, 237, 0.15);
+        }
+
+        button.action-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            font-size: 1rem;
+            margin-top: 10px;
+        }
+
+        button.action-btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-purple { background-color: var(--accent-purple); color: white; }
+        .btn-dark { background-color: #1a1c3b; color: white; }
+
+        .output-box {
+            margin-top: 25px;
+            padding: 18px;
+            background-color: #f5f6f8;
+            border-right: 4px solid var(--accent-purple);
+            border-radius: 8px;
+            word-break: break-all;
+        }
+
+        .strength-meter {
+            height: 8px;
+            background-color: #e4e6eb;
+            border-radius: 4px;
+            margin-top: 12px;
+            overflow: hidden;
+        }
+
+        .strength-bar {
+            height: 100%;
+            width: 0%;
+            transition: width 0.4s ease, background-color 0.4s ease;
+        }
+
+        #passwordFeedback {
+            margin-top: 15px;
+            font-size: 1.05rem;
+            font-weight: 600;
+        }
+
+        #scoreBadge {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 6px 12px;
+            background-color: #e4e6eb;
+            border-radius: 6px;
+            color: var(--accent-purple);
+            font-weight: bold;
+            font-family: monospace;
+            font-size: 1.1rem;
+        }
+
+        canvas {
+            max-width: 100%;
+            max-height: 200px;
+            border: 1px dashed #dbdee3;
+            border-radius: 10px;
+            display: block;
+            margin: 15px auto 0 auto;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="nav-menu">
+        <button id="btnPasswordPage" class="nav-btn active" onclick="switchPage('passwordPage')">تقييم كلمات السر</button>
+        <button id="btnCipherPage" class="nav-btn" onclick="switchPage('cipherPage')">تشفير او فك تشفير</button>
+        <button id="btnStegoPage" class="nav-btn" onclick="switchPage('stegoPage')">إخفاء البيانات في الصور (Steganography)</button>
+    </div>
+
+    <!-- ================= الصفحة الأولى ================= -->
+    <div id="passwordPage" class="page-content active">
+        <div class="card">
+            <h2>لوحة تحليل وتقييم قوة كلمات السر</h2>
+            <div class="form-group">
+                <label>أدخل كلمة السر للمحاكاة والتقييم الفوري:</label>
+                <input type="password" id="passwordInput" oninput="evaluatePassword()" placeholder="اكتب كلمة السر هنا...">
+            </div>
+            <div style="margin: 25px 0;">
+                <label>مستوى القوة الإجمالي:</label>
+                <div class="strength-meter">
+                    <div id="strengthBar" class="strength-bar"></div>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: space-between; background: #f5f6f8; padding: 20px; border-radius: 10px;">
+                <div>
+                    <span style="color: var(--text-muted); font-size: 0.85rem; display: block; margin-bottom: 4px;">التحليل والنتيجة:</span>
+                    <div id="passwordFeedback">أدخل كلمة سر للتحليل الفوري...</div>
+                </div>
+                <div style="text-align: center;">
+                    <span style="color: var(--text-muted); font-size: 0.85rem; display: block; margin-bottom: 5px;">الدرجة</span>
+                    <div id="scoreBadge">0/100</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= الصفحة الثانية ================= -->
+    <div id="cipherPage" class="page-content">
+        <div class="sub-menu">
+            <button id="subBtnEncrypt" class="sub-btn active" onclick="switchSubMode('encryptMode')">Encrypt (تشفير)</button>
+            <button id="subBtnDecrypt" class="sub-btn" onclick="switchSubMode('decryptMode')">Decrypt (فك تشفير)</button>
+        </div>
+
+        <div id="encryptMode" class="sub-content active">
+            <div class="card">
+                <h2>أدوات تشفير النصوص المتقدمة</h2>
+                <div class="form-group">
+                    <label>اختر نوع التشفير:</label>
+                    <select id="cipherSelectEnc" onchange="toggleCipherFields('Enc')">
+                        <option value="caesar">Caesar Cipher (تشفير قيصر)</option>
+                        <option value="vigenere">Vigenère Cipher (تشفير فيجينير)</option>
+                        <option value="rsa">RSA Cipher (المفتاح العام)</option>
+                    </select>
+                </div>
+                <div id="standardKeyGroupEnc" class="form-group">
+                    <label id="keyLabelEnc">أدخل المفتاح (رقم):</label>
+                    <input type="text" id="cipherKeyEnc" value="3">
+                </div>
+                <div id="rsaInputsEnc" style="display: none;">
+                    <div class="form-group"><label>العدد الأولي الأول (P):</label><input type="number" id="rsaPEnc" value="61"></div>
+                    <div class="form-group"><label>العدد الأولي الثاني (Q):</label><input type="number" id="rsaQEnc" value="53"></div>
+                    <div class="form-group"><label>المفتاح العلني (E):</label><input type="number" id="rsaEEnc" value="17"></div>
+                </div>
+                <div class="form-group">
+                    <label>النص المراد تشفيره:</label>
+                    <textarea id="cipherInputEnc" rows="2" placeholder="اكتب النص المراد تشفيره هنا..."></textarea>
+                </div>
+                <button class="action-btn btn-purple" onclick="processCipher(true)">تشفير النص</button>
+                <div class="output-box">
+                    <strong>النص المشفر الناتج:</strong>
+                    <div id="cipherOutputEnc" style="margin-top: 8px;">بانتظار المدخلات...</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="decryptMode" class="sub-content">
+            <div class="card">
+                <h2>أدوات فك تشفير النصوص</h2>
+                <div class="form-group">
+                    <label>اختر نوع التشفير:</label>
+                    <select id="cipherSelectDec" onchange="toggleCipherFields('Dec')">
+                        <option value="caesar">Caesar Cipher (تشفير قيصر)</option>
+                        <option value="vigenere">Vigenère Cipher (تشفير فيجينير)</option>
+                        <option value="rsa">RSA Cipher (المفتاح العام)</option>
+                    </select>
+                </div>
+                <div id="standardKeyGroupDec" class="form-group">
+                    <label id="keyLabelDec">أدخل المفتاح:</label>
+                    <input type="text" id="cipherKeyDec" value="3">
+                </div>
+                <div id="rsaInputsDec" style="display: none;">
+                    <div class="form-group"><label>العدد الأولي الأول (P):</label><input type="number" id="rsaPDec" value="61"></div>
+                    <div class="form-group"><label>العدد الأولي الثاني (Q):</label><input type="number" id="rsaQDec" value="53"></div>
+                    <div class="form-group"><label>المفتاح الخاص لفك التشفير (D):</label><input type="number" id="rsaDDec" placeholder="أدخل قيمة D"></div>
+                </div>
+                <div class="form-group">
+                    <label>النص المشفر المطلوب معالجته:</label>
+                    <textarea id="cipherInputDec" rows="2" placeholder="أصق النص المشفر هنا..."></textarea>
+                </div>
+                <button class="action-btn btn-purple" onclick="processCipher(false)">فك التشفير الآن</button>
+                <div class="output-box">
+                    <strong>النص الأصلي المستخرج:</strong>
+                    <div id="cipherOutputDec" style="margin-top: 8px;">بانتظار المدخلات...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= الصفحة الثالثة: Steganography المستقرة تماماً ================= -->
+    <div id="stegoPage" class="page-content">
+        <div class="sub-menu">
+            <button id="subBtnStegoEncrypt" class="sub-btn active" onclick="switchStegoSubMode('stegoEncryptMode')">Encrypt (إخفاء)</button>
+            <button id="subBtnStegoDecrypt" class="sub-btn" onclick="switchStegoSubMode('stegoDecryptMode')">Decrypt (استخراج)</button>
+        </div>
+
+        <div id="stegoEncryptMode" class="sub-content active">
+            <div class="card">
+                <h2>حفر وإخفاء رسالة سرية داخل صورة (يدعم العربية)</h2>
+                <div class="form-group">
+                    <label>اختر الصورة الأساسية (PNG لضمان الدقة):</label>
+                    <input type="file" id="imageLoaderEnc" accept="image/*" onchange="handleImage(event, 'stegoCanvasEnc')">
+                    <canvas id="stegoCanvasEnc"></canvas>
+                </div>
+                <div class="form-group">
+                    <label>الرسالة السرية المراد إخفاؤها (بالعربي أو الإنجليزي):</label>
+                    <textarea id="stegoMessageEnc" rows="2" placeholder="اكتب رسالتك السرية هنا باللغة العربية..."></textarea>
+                </div>
+                <button class="action-btn btn-purple" onclick="hideMessage()">حفر الرسالة وتحميل الصورة المحدثة</button>
+            </div>
+        </div>
+
+        <div id="stegoDecryptMode" class="sub-content">
+            <div class="card">
+                <h2>استخراج وفك قراءة رسالة مخفية من صورة</h2>
+                <div class="form-group">
+                    <label>ارفع الصورة المحدثة المحتوية على النص المخفي:</label>
+                    <input type="file" id="imageLoaderDec" accept="image/*" onchange="handleImage(event, 'stegoCanvasDec')">
+                    <canvas id="stegoCanvasDec"></canvas>
+                </div>
+                <button class="action-btn btn-dark" onclick="revealMessage()">قراءة واستخراج النص المخفي</button>
+                <div class="output-box">
+                    <strong>الرسالة المستخرجة المكتشفة:</strong>
+                    <div id="stegoOutputDec" style="margin-top: 8px;">لم يتم استخراج أي بيانات بعد...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function switchPage(pageId) {
+        document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(pageId).classList.add('active');
+        if(pageId === 'passwordPage') document.getElementById('btnPasswordPage').classList.add('active');
+        else if(pageId === 'cipherPage') document.getElementById('btnCipherPage').classList.add('active');
+        else if(pageId === 'stegoPage') document.getElementById('btnStegoPage').classList.add('active');
+    }
+
+    function switchSubMode(modeId) {
+        document.querySelectorAll('#cipherPage .sub-content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('#cipherPage .sub-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(modeId).classList.add('active');
+        if(modeId === 'encryptMode') document.getElementById('subBtnEncrypt').classList.add('active');
+        else document.getElementById('subBtnDecrypt').classList.add('active');
+    }
+
+    function switchStegoSubMode(modeId) {
+        document.querySelectorAll('#stegoPage .sub-content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('#stegoPage .sub-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(modeId).classList.add('active');
+        if(modeId === 'stegoEncryptMode') document.getElementById('subBtnStegoEncrypt').classList.add('active');
+        else document.getElementById('subBtnStegoDecrypt').classList.add('active');
+    }
+
+    function toggleCipherFields(suffix) {
+        const type = document.getElementById('cipherSelect' + suffix).value;
+        document.getElementById('standardKeyGroup' + suffix).style.display = type === 'rsa' ? 'none' : 'block';
+        document.getElementById('rsaInputs' + suffix).style.display = type === 'rsa' ? 'block' : 'none';
+        if (type === 'caesar') document.getElementById('keyLabel' + suffix).innerText = "أدخل المفتاح (رقم):";
+        if (type === 'vigenere') document.getElementById('keyLabel' + suffix).innerText = "أدخل المفتاح (نص):";
+    }
+
+    // معالجة معززة تضمن تحميل كامل بيانات وأبعاد الصورة قبل استخدامها
+    function handleImage(e, canvasId) {
+        if(!e.target.files[0]) return;
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const img = new Image();
+            img.onload = async function() {
+                if ('decode' in img) {
+                    await img.decode(); // إجبار المتصفح على الانتظار حتى فك تشفير أبعاد الصورة تماماً في الذاكرة
+                }
+                const canvas = document.getElementById(canvasId);
+                const ctx = canvas.getContext('2d');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0);
+            }
+            img.src = event.target.result;
+        }
+        reader.readAsDataURL(e.target.files[0]);
+    }
+
+    // دالة الإخفاء المحدثة
+    function hideMessage() {
+        const canvas = document.getElementById('stegoCanvasEnc');
+        if (canvas.width === 0) { alert("يرجى رفع صورة أولاً."); return; }
+        const ctx = canvas.getContext('2d');
+        const msg = document.getElementById('stegoMessageEnc').value;
+        if (!msg) { alert("يرجى كتابة رسالة أولاً لإخفائها."); return; }
+
+        let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        let data = imgData.data;
+
+        // ترميز اللغة العربية والإنجليزية بـ UTF-8
+        const encoder = new TextEncoder();
+        const u8Array = encoder.encode(msg);
+
+        let bitString = "";
+        for (let i = 0; i < u8Array.length; i++) {
+            bitString += u8Array[i].toString(2).padStart(8, '0');
+        }
+        
+        // راية نهاية نص مخصصة وقوية (32 بت صفرية) لمنع التداخل
+        bitString += "00000000000000000000000000000000"; 
+
+        if (bitString.length > data.length * 0.75) {
+            alert("حجم النص العربي ضخم جداً بالنسبة لهذه الصورة، يرجى استخدام صورة أكبر.");
+            return;
+        }
+
+        let bitIndex = 0;
+        for (let i = 0; i < data.length; i++) {
+            if (i % 4 === 3) continue; // تخطي الـ Alpha للحفاظ على الشفافية والألوان الأساسية
+            if (bitIndex < bitString.length) {
+                data[i] = (data[i] & 0xFE) | parseInt(bitString[bitIndex]);
+                bitIndex++;
+            } else { break; }
+        }
+
+        ctx.putImageData(imgData, 0, 0);
+        
+        const link = document.createElement('a');
+        link.download = 'secure_arabic_stego.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    }
+
+    // دالة الاستخراج المحدثة والمستقرة تماماً
+    function revealMessage() {
+        const canvas = document.getElementById('stegoCanvasDec');
+        if (canvas.width === 0) { alert("يرجى رفع الصورة المستهدفة أولاً."); return; }
+        
+        const ctx = canvas.getContext('2d');
+        let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        let data = imgData.data;
+
+        let bitString = "";
+        for (let i = 0; i < data.length; i++) {
+            if (i % 4 === 3) continue;
+            bitString += (data[i] & 1).toString();
+        }
+
+        let bytes = [];
+        for (let i = 0; i < bitString.length; i += 8) {
+            let byteStr = bitString.substr(i, 8);
+            if (byteStr.length < 8) break;
+            
+            // التوقف الذكي الفوري عند قراءة راية النهاية الصفرية الممتدة
+            if (byteStr === "00000000") {
+                if (bitString.substr(i, 32) === "00000000000000000000000000000000") {
+                    break;
+                }
+            }
+            bytes.push(parseInt(byteStr, 2));
+        }
+
+        try {
+            const u8Array = new Uint8Array(bytes);
+            const decoder = new TextDecoder('utf-8');
+            const decodedMsg = decoder.decode(u8Array);
+            
+            document.getElementById('stegoOutputDec').innerText = decodedMsg.trim() ? decodedMsg : "لم يتم العثور على أي رسائل مخفية داخل هذه الصورة.";
+        } catch (e) {
+            document.getElementById('stegoOutputDec').innerText = "حدث خطأ أثناء فك ترميز البيانات، قد تكون الصورة تالفة أو مضغوطة.";
+        }
+    }
+
+    // دالات التشفير التقليدي
+    function processCipher(isEncrypt) {
+        const suffix = isEncrypt ? 'Enc' : 'Dec';
+        const type = document.getElementById('cipherSelect' + suffix).value;
+        const input = document.getElementById('cipherInput' + suffix).value;
+        let output = "";
+
+        if (type === 'caesar') {
+            let k = parseInt(document.getElementById('cipherKey' + suffix).value) || 0;
+            if (!isEncrypt) k = -k;
+            output = caesarCipher(input, k);
+        } else if (type === 'vigenere') {
+            const key = document.getElementById('cipherKey' + suffix).value;
+            output = vigenereCipher(input, key, isEncrypt);
+        } else if (type === 'rsa') {
+            output = rsaCipher(input, isEncrypt, suffix);
+        }
+        document.getElementById('cipherOutput' + suffix).innerText = output;
+    }
+
+    function caesarCipher(m, k) {
+        k = ((k % 26) + 26) % 26; 
+        let c = "";
+        for (let i = 0; i < m.length; i++) {
+            let code = m.charCodeAt(i);
+            if (code >= 65 && code <= 90) c += String.fromCharCode(((code - 65 + k) % 26) + 65);
+            else if (code >= 97 && code <= 122) c += String.fromCharCode(((code - 97 + k) % 26) + 97);
+            else c += m[i];
+        }
+        return c;
+    }
+
+    function vigenereCipher(m, k, isEncrypt) {
+        if (!k) return m;
+        let c = ""; let j = 0;
+        for (let i = 0; i < m.length; i++) {
+            let mCode = m.charCodeAt(i);
+            let kCode = k.charCodeAt(j % k.length);
+            let kShift = (kCode >= 97) ? kCode - 97 : kCode - 65;
+            if (!isEncrypt) kShift = 26 - kShift;
+
+            if (mCode >= 65 && mCode <= 90) { c += String.fromCharCode(((mCode - 65 + kShift) % 26) + 65); j++; }
+            else if (mCode >= 97 && mCode <= 122) { c += String.fromCharCode(((mCode - 97 + kShift) % 26) + 97); j++; }
+            else c += m[i];
+        }
+        return c;
+    }
+
+    function power(base, exp, mod) {
+        let res = 1n; base = BigInt(base) % BigInt(mod); exp = BigInt(exp);
+        while (exp > 0n) {
+            if (exp % 2n === 1n) res = (res * base) % BigInt(mod);
+            base = (base * base) % BigInt(mod); exp /= 2n;
+        }
+        return Number(res);
+    }
+
+    function rsaCipher(m, isEncrypt, suffix) {
+        const p = parseInt(document.getElementById('rsaP' + suffix).value);
+        const q = parseInt(document.getElementById('rsaQ' + suffix).value);
+        const n = p * q;
+
+        if (isEncrypt) {
+            const e = parseInt(document.getElementById('rsaEEnc').value);
+            let encArr = [];
+            for (let i = 0; i < m.length; i++) encArr.push(power(m.charCodeAt(i), e, n));
+            return encArr.join(" ");
+        } else {
+            const d = parseInt(document.getElementById('rsaDDec').value);
+            if (!d) return "خطأ: يجب إدخال قيمة d لفك التشفير الرياضي.";
+            let nums = m.trim().split(/\s+/); let decStr = "";
+            for (let i = 0; i < nums.length; i++) {
+                if(nums[i] === "") continue;
+                decStr += String.fromCharCode(power(parseInt(nums[i]), d, n));
+            }
+            return decStr;
+        }
+    }
+
+    function evaluatePassword() {
+        const p = document.getElementById('passwordInput').value;
+        const bar = document.getElementById('strengthBar');
+        const feedback = document.getElementById('passwordFeedback');
+        const badge = document.getElementById('scoreBadge');
+
+        if (p.length === 0) {
+            bar.style.width = "0%"; feedback.innerText = "أدخل كلمة سر للتحليل الفوري..."; badge.innerText = "0/100"; return;
+        }
+
+        let a = 0, b = 0, c = 60, d = 0, e = 0, f = 0, g = 0, h = 0, j = 0;
+        if (p.length <= 8) { c -= 20; } 
+        else if (p.length >= 16) { c += 20; } 
+        else if (p.length < 12) { c -= 10; } 
+        else if (p.length >= 12) { c += 15; }
+
+        for (let i = 0; i < p.length - 1; i++) {
+            let codeCurrent = p.charCodeAt(i); let codeNext = p.charCodeAt(i + 1);
+            if (codeCurrent + 1 === codeNext || codeCurrent - 1 === codeNext) { a++; } 
+            else if (p[i] === p[i + 1]) { b++; } 
+            else if (codeCurrent + 33 === codeNext || codeCurrent - 31 === codeNext) { a++; }
+        }
+
+        for (let i = 0; i < p.length - 3; i++) {
+            if (p[i] >= '0' && p[i] <= '9' && p[i+1] >= '0' && p[i+1] <= '9' && p[i+2] >= '0' && p[i+2] <= '9' && p[i+3] >= '0' && p[i+3] <= '9') {
+                let year = parseInt(p[i]) * 1000 + parseInt(p[i+1]) * 100 + parseInt(p[i+2]) * 10 + parseInt(p[i+3]);
+                if (year >= 1970 && year <= 2030) { j++; }
+            }
+        }
+
+        for (let i = 0; i < p.length; i++) {
+            let ch = p[i];
+            if (ch > ' ' && ch < '0') { break; } 
+            else if (ch > '9' && ch < 'A') { break; } 
+            else if (ch > 'Z' && ch < 'a') { break; } 
+            else if (ch > 'z' && ch.charCodeAt(0) < 127) { break; } 
+            else { g++; }
+
+            if (ch >= 'A' && ch <= 'Z') { d++; } 
+            else if (ch >= 'a' && ch <= 'z') { e++; }
+            if (ch >= '0' && ch <= '9') { f++; } 
+            else { h++; }
+        }
+
+        if (a === p.length - 1) { c -= 30; } else if (a >= 3) { c -= 15; } else if (a === 0) { c += 5; }
+        if (b === p.length - 1) { c -= 30; } else if (b >= 2) { c -= 10; } else if (b === 0) { c += 5; }
+        if (d === p.length || e === p.length || f === p.length) { c -= 20; }
+        if (g === p.length) { c -= 10; } else { c += 5; }
+        if (h === p.length) { c -= 10; }
+        if (d > 0 && e > 0 && f > 0 && g !== p.length) { c += 15; }
+
+        if (d === 0) c -= 5; if (e === 0) c -= 5; if (f === 0) c -= 5;
+        if (j > 0) { c -= 10; } else if (j === 0) { c += 5; }
+
+        if (c > 100) c = 100; if (c < 0) c = 0;
+
+        badge.innerText = c + "/100"; bar.style.width = c + "%";
+
+        if (c >= 90) { feedback.innerText = "ممتازة جداً! كلمة المرور قوية للغاية وتصعب مهاجمتها. 💪"; bar.style.backgroundColor = "#22c55e"; } 
+        else if (c >= 75) { feedback.innerText = "جيدة! كلمة مرور قوية ولكن يمكن تحسينها بإضافة رموز."; bar.style.backgroundColor = "#3b82f6"; } 
+        else if (c >= 50) { feedback.innerText = "متوسطة القوة، يُنصح بتجنب التكرار وزيادة الطول."; bar.style.backgroundColor = "#f59e0b"; } 
+        else { feedback.innerText = "ضعيفة جداً! يسهل تخمينها، يرجى تغييرها فوراً."; bar.style.backgroundColor = "#ef4444"; }
+    }
+</script>
+</body>
+</html>
