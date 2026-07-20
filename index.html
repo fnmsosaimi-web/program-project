@@ -220,7 +220,6 @@
             word-break: break-all;
         }
 
-        /* تنسيقات تقييم كلمات السر وزمن الاختراق */
         .time-box {
             margin-top: 15px;
             padding: 15px;
@@ -252,7 +251,6 @@
             transition: width 0.4s ease, background-color 0.4s ease;
         }
 
-        /* تنسيقات الخطوات التعليمية */
         .edu-steps-container {
             margin-top: 20px;
             padding: 15px;
@@ -348,7 +346,6 @@
 
 <div class="app-container">
 
-    <!-- المحتوى الرئيسي -->
     <div class="main-content">
 
         <!-- ================= الصفحة الأولى: تقييم كلمات السر ================= -->
@@ -360,7 +357,6 @@
                     <input type="password" id="passwordInput" oninput="evaluatePassword()" placeholder="اكتب كلمة السر هنا...">
                 </div>
 
-                <!-- تقدير زمن الاختراق -->
                 <div class="time-box">
                     <div>الزمن التقديري لاختراق كلمة السر (هجوم Brute-Force):</div>
                     <span id="crackTimeResult">بانتظار المدخلات...</span>
@@ -384,7 +380,6 @@
                     </div>
                 </div>
 
-                <!-- قسم نقاط القوة والضعف -->
                 <div class="analysis-section" id="analysisSection" style="display: none;">
                     <div class="analysis-box strengths">
                         <h4>✔ عناصر الأمان المفعلة:</h4>
@@ -398,19 +393,17 @@
             </div>
         </div>
 
-        <!-- ================= الصفحة الثانية: تشفير أو فك التشفير ================= -->
+        <!-- ================= الصفحة الثانية: التشفير التعليمي ================= -->
         <div id="cipherPage" class="page-content">
             <div class="sub-menu">
                 <button id="subBtnEncrypt" class="sub-btn active" onclick="switchSubMode('encryptMode')">تشفير (Encrypt)</button>
                 <button id="subBtnDecrypt" class="sub-btn" onclick="switchSubMode('decryptMode')">فك تشفير (Decrypt)</button>
             </div>
 
-            <!-- نمط التشفير -->
             <div id="encryptMode" class="sub-content active">
                 <div class="card">
                     <h2 id="encTitle">أدوات التشفير التعليمية</h2>
 
-                    <!-- Caesar Encrypt Panel -->
                     <div id="panelCaesarEnc" class="cipher-panel active">
                         <div class="form-group">
                             <label>مفتاح الإزاحة Shift Key (رقم):</label>
@@ -418,7 +411,6 @@
                         </div>
                     </div>
 
-                    <!-- Vigenere Encrypt Panel -->
                     <div id="panelVigenereEnc" class="cipher-panel">
                         <div class="form-group">
                             <label>المفتاح النصي (Secret Key):</label>
@@ -426,7 +418,6 @@
                         </div>
                     </div>
 
-                    <!-- RSA Encrypt Panel -->
                     <div id="panelRsaEnc" class="cipher-panel">
                         <div class="form-group"><label>العدد الأولي الأول (P):</label><input type="number" id="rsaPEnc" value="61"></div>
                         <div class="form-group"><label>العدد الأولي الثاني (Q):</label><input type="number" id="rsaQEnc" value="53"></div>
@@ -445,7 +436,6 @@
                         <div id="cipherOutputEnc" style="margin-top: 8px; font-family: monospace; font-size: 1.1rem; color: var(--accent-purple);">--</div>
                     </div>
 
-                    <!-- خطوات الشرح التعليمية لتشفير قيصر -->
                     <div id="caesarEduSectionEnc" class="edu-steps-container" style="display:none;">
                         <h4 style="margin-bottom: 10px; color: #1a1c3b;">📚 خطوات التشفير بالتفصيل (خطوة بخطوة):</h4>
                         <div id="caesarStepsListEnc"></div>
@@ -453,7 +443,6 @@
                 </div>
             </div>
 
-            <!-- نمط فك التشفير -->
             <div id="decryptMode" class="sub-content">
                 <div class="card">
                     <h2 id="decTitle">أدوات فك التشفير</h2>
@@ -689,16 +678,12 @@
         if (pwd.length >= 12) strengths.push(`طول مناسب جداً (${pwd.length} حرف)`);
         else weaknesses.push(`كلمة السر قصيرة (${pwd.length} أحرُف). يفضل أن تكون 12+`);
 
-        // حساب عدد الاحتمالات الناتجة: Charset ^ Length
         const combinations = Math.pow(charsetSize, pwd.length);
-        
-        // فرضية: كرت شاشة متوسط في الهجوم يحاول 10,000,000,000 محاولة في الثانية (10 GH/s)
         const guessesPerSecond = 1e10; 
         const secondsToCrack = combinations / guessesPerSecond;
 
         timeResult.innerText = formatTime(secondsToCrack);
 
-        // حساب الدرجة 0 - 100
         let score = Math.min(100, Math.floor((Math.log2(combinations || 1) / 80) * 100));
         scoreBadge.innerText = `${score}/100`;
         bar.style.width = `${score}%`;
@@ -719,14 +704,23 @@
         analysisSection.style.display = "grid";
     }
 
+    // دالة تنسيق الوقت المعدلة لتظهر 1Trillion+
     function formatTime(seconds) {
         if (seconds < 1) return "أقل من ثانية واحدة (اختراق فوري!)";
         if (seconds < 60) return `${Math.round(seconds)} ثانية`;
         if (seconds < 3600) return `${Math.round(seconds / 60)} دقيقة`;
         if (seconds < 86400) return `${Math.round(seconds / 3600)} ساعة`;
         if (seconds < 31536000) return `${Math.round(seconds / 86400)} يوم`;
-        if (seconds < 31536000000) return `${Math.round(seconds / 31536000)} سنة`;
-        return `${(seconds / 315360001000).toFixed(1)} مليون سنة (آمنة تماماً)`;
+        
+        const years = seconds / 31536000;
+        
+        if (years < 1000) return `${Math.round(years)} سنة`;
+        if (years < 1e6) return `${(years / 1000).toFixed(1)} ألف سنة`;
+        if (years < 1e9) return `${(years / 1e6).toFixed(1)} مليون سنة`;
+        if (years < 1e12) return `${(years / 1e9).toFixed(1)} مليار سنة`;
+        
+        // عند تجاوز ترليون سنة (1,000,000,000,000 سنة)
+        return "1Trillion+ سنة";
     }
 
     // --- 3. خوارزميات التشفير والخطوات التعليمية ---
@@ -744,7 +738,6 @@
             const res = caesarCipherEdu(input, k, isEncrypt);
             output = res.result;
 
-            // عرض الشرح الخطوي لتشفير قيصر
             eduSection.style.display = "block";
             stepsList.innerHTML = res.steps.map(st => `
                 <div class="step-item">
@@ -766,7 +759,6 @@
         document.getElementById('cipherOutput' + suffix).innerText = output || "--";
     }
 
-    // خوارزمية قيصر التفاعلية + توثيق الخطوات
     function caesarCipherEdu(text, shift, isEncrypt) {
         let k = isEncrypt ? shift : -shift;
         k = ((k % 26) + 26) % 26;
@@ -777,23 +769,23 @@
             let char = text[i];
             let code = text.charCodeAt(i);
 
-            if (code >= 65 && code <= 90) { // الأحرف الكبيرة A-Z
+            if (code >= 65 && code <= 90) { 
                 let p = code - 65;
                 let c = (p + k) % 26;
                 let newChar = String.fromCharCode(c + 65);
                 result += newChar;
                 steps.push({
                     char: char,
-                    explanation: `الحرف '${char}' ترتيبه (${p}). بالإزاحة (+${k}): (${p} + ${k}) mod 26 = ${c} $\\rightarrow$ الحرف الناتج: '${newChar}'`
+                    explanation: `الحرف '${char}' ترتيبه (${p}). بالإزاحة (+${k}): (${p} + ${k}) mod 26 = ${c} ➔ الحرف الناتج: '${newChar}'`
                 });
-            } else if (code >= 97 && code <= 122) { // الأحرف الصغيرة a-z
+            } else if (code >= 97 && code <= 122) { 
                 let p = code - 97;
                 let c = (p + k) % 26;
                 let newChar = String.fromCharCode(c + 97);
                 result += newChar;
                 steps.push({
                     char: char,
-                    explanation: `الحرف '${char}' ترتيبه (${p}). بالإزاحة (+${k}): (${p} + ${k}) mod 26 = ${c} $\\rightarrow$ الحرف الناتج: '${newChar}'`
+                    explanation: `الحرف '${char}' ترتيبه (${p}). بالإزاحة (+${k}): (${p} + ${k}) mod 26 = ${c} ➔ الحرف الناتج: '${newChar}'`
                 });
             } else {
                 result += char;
@@ -877,7 +869,7 @@
 
     function revealMessage() {
         const canvas = document.getElementById('stegoCanvasDec');
-        if (canvas.width === 0) { alert("يرجى رفع الصورة مستهدفة أولاً."); return; }
+        if (canvas.width === 0) { alert("يرجى رفع الصورة المستهدفة أولاً."); return; }
         const ctx = canvas.getContext('2d');
         let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         let data = imgData.data;
