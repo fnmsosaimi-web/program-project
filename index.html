@@ -265,7 +265,6 @@
             font-size: 1.1rem;
         }
 
-        /* تنسيقات قسم نقاط القوة والضعف */
         .analysis-section {
             margin-top: 20px;
             display: grid;
@@ -402,7 +401,7 @@
                     </div>
                 </div>
 
-                <!-- قسم تحليل نقاط القوة والضعف المضاف -->
+                <!-- قسم تحليل نقاط القوة والضعف -->
                 <div class="analysis-section" id="analysisSection" style="display: none;">
                     <div class="analysis-box strengths">
                         <h4>✔ نقاط القوة:</h4>
@@ -844,95 +843,77 @@
         analysisSection.style.display = "grid";
         let strengths = [];
         let weaknesses = [];
+        let score = 0;
 
-        let a = 0, b = 0, c = 60;
-        let d = 0, e = 0, f = 0, g = 0, h = 0, j = 0;
-
-        // فحص الطول
-        if (p.length < 8) { 
-            c -= 20; 
-            weaknesses.push("طول كلمة السر قصير جداً (أقل من 8 خانات).");
-        } else if (p.length >= 16) { 
-            c += 20; 
-            strengths.push("الطول ممتاز جداً (16 خانة أو أكثر).");
-        } else if (p.length >= 12) { 
-            c += 15; 
-            strengths.push("الطول جيد جداً (12 خانة أو أكثر).");
+        // 1. فحص الطول
+        if (p.length >= 12) {
+            score += 35;
+            strengths.push("طول كلمة السر ممتاز (12 حرفًا أو أكثر).");
+        } else if (p.length >= 8) {
+            score += 20;
+            strengths.push("طول كلمة السر مقبول (8 أحرف أو أكثر).");
+            weaknesses.push("يفضل زيادة الطول إلى 12 حرفًا على الأقل لزيادة التعقيد.");
         } else {
-            strengths.push("الطول مقبول (8 خانات أو أكثر).");
-            weaknesses.push("يُفضل زيادة الطول إلى 12+ خانة لأمان أفضل.");
+            score += 5;
+            weaknesses.push("كلمة السر قصيرة جدًا (أقل من 8 أحرف).");
         }
 
-        // فحص التتابع والتكرار
-        for (let i = 0; i < p.length - 1; i++) {
-            let codeCurrent = p.charCodeAt(i); let codeNext = p.charCodeAt(i + 1);
-            if (codeCurrent + 1 === codeNext || codeCurrent - 1 === codeNext) { a++; } 
-            else if (p[i] === p[i + 1]) { b++; } 
-            else if (codeCurrent + 33 === codeNext || codeCurrent - 31 === codeNext) { a++; }
+        // 2. الأحرف الكبيرة
+        if (/[A-Z]/.test(p)) {
+            score += 15;
+            strengths.push("تحتوي على أحرف إنجليزية كبيرة (A-Z).");
+        } else {
+            weaknesses.push("لا تحتوي على أحرف إنجليزية كبيرة.");
         }
 
-        if (a > 2) weaknesses.push("تحتوي على أحرف/أرقام متتالية (مثل abc أو 123).");
-        if (b > 1) weaknesses.push("تحتوي على أحرف/أرقام مكررة بجانب بعضها.");
-
-        // فحص التواريخ / السنوات
-        for (let i = 0; i < p.length - 3; i++) {
-            if (p[i] >= '0' && p[i] <= '9' && p[i+1] >= '0' && p[i+1] <= '9' && p[i+2] >= '0' && p[i+2] <= '9' && p[i+3] >= '0' && p[i+3] <= '9') {
-                let year = parseInt(p[i]) * 1000 + parseInt(p[i+1]) * 100 + parseInt(p[i+2]) * 10 + parseInt(p[i+3]);
-                if (year >= 1970 && year <= 2030) { j++; }
-            }
-        }
-        if (j > 0) weaknesses.push("تضمين تاريخ/سنة قد يسهل التخمين الهجومي.");
-
-        // فحص أنواع الرموز
-        for (let i = 0; i < p.length; i++) {
-            let ch = p[i];
-            if (ch > ' ' && ch < '0') { break; } 
-            else if (ch > '9' && ch < 'A') { break; } 
-            else if (ch > 'Z' && ch < 'a') { break; } 
-            else if (ch > 'z' && ch.charCodeAt(0) < 127) { break; } 
-            else { g++; }
-
-            if (ch >= 'A' && ch <= 'Z') { d++; } 
-            else if (ch >= 'a' && ch <= 'z') { e++; }
-            if (ch >= '0' && ch <= '9') { f++; } 
-            else { h++; }
+        // 3. الأحرف الصغيرة
+        if (/[a-z]/.test(p)) {
+            score += 15;
+            strengths.push("تحتوي على أحرف إنجليزية صغيرة (a-z).");
+        } else {
+            weaknesses.push("لا تحتوي على أحرف إنجليزية صغيرة.");
         }
 
-        if (d > 0) strengths.push("تحتوي على أحرف كبيرة (Uppercase).");
-        else weaknesses.push("تفتقر إلى أحرف كبيرة (A-Z).");
+        // 4. الأرقام
+        if (/[0-9]/.test(p)) {
+            score += 15;
+            strengths.push("تحتوي على أرقام (0-9).");
+        } else {
+            weaknesses.push("لا تحتوي على أرقام.");
+        }
 
-        if (e > 0) strengths.push("تحتوي على أحرف صغيرة (Lowercase).");
-        else weaknesses.push("تفتقر إلى أحرف صغيرة (a-z).");
+        // 5. الرموز الخاصة
+        if (/[^A-Za-z0-9]/.test(p)) {
+            score += 20;
+            strengths.push("تحتوي على رموز خاصة (!@#$%^&*...).");
+        } else {
+            weaknesses.push("أضف رموزًا خاصة لزيادة الأمان.");
+        }
 
-        if (f > 0) strengths.push("تحتوي على أرقام (0-9).");
-        else weaknesses.push("تفتقر إلى أرقام.");
+        // ضمان القيمة بين 0 و 100
+        score = Math.min(100, Math.max(0, score));
 
-        if (h > 0) strengths.push("تحتوي على رموز خاصة (!@#$).");
-        else weaknesses.push("تفتقر إلى رموز خاصة (!@#$).");
+        // تحديث شريط القوة والألوان
+        bar.style.width = score + "%";
+        badge.innerText = score + "/100";
 
-        // حساب الدرجة النهائية
-        if (a === p.length - 1) { c -= 30; } else if (a >= 3) { c -= 15; } else if (a === 0) { c += 5; }
-        if (b === p.length - 1) { c -= 30; } else if (b >= 2) { c -= 10; } else if (b === 0) { c += 5; }
-        if (d === p.length || e === p.length || f === p.length) { c -= 20; }
-        if (g === p.length) { c -= 10; } else { c += 5; }
-        if (h === p.length) { c -= 10; }
-        if (d > 0 && e > 0 && f > 0 && g !== p.length) { c += 15; }
+        if (score < 40) {
+            bar.style.backgroundColor = "#ef4444";
+            feedback.innerText = "ضعيفة جداً - سهلة الاختراق 🔴";
+            feedback.style.color = "#dc2626";
+        } else if (score < 70) {
+            bar.style.backgroundColor = "#f59e0b";
+            feedback.innerText = "متوسطة - تحتاج بعض التحسينات 🟡";
+            feedback.style.color = "#d97706";
+        } else {
+            bar.style.backgroundColor = "#10b981";
+            feedback.innerText = "قوية جداً - مستوى أمان ممتاز 🟢";
+            feedback.style.color = "#059669";
+        }
 
-        if (d === 0) c -= 5; if (e === 0) c -= 5; if (f === 0) c -= 5;
-        if (j > 0) { c -= 10; } else if (j === 0) { c += 5; }
-
-        if (c > 100) c = 100; if (c < 0) c = 0;
-
-        badge.innerText = c + "/100"; bar.style.width = c + "%";
-
-        if (c >= 90) { feedback.innerText = "ممتازة جداً! كلمة المرور قوية للغاية وتصعب مهاجمتها. 💪"; bar.style.backgroundColor = "#22c55e"; } 
-        else if (c >= 75) { feedback.innerText = "جيدة! كلمة مرور قوية ولكن يمكن تحسينها بإضافة رموز."; bar.style.backgroundColor = "#3b82f6"; } 
-        else if (c >= 50) { feedback.innerText = "متوسطة القوة، يُنصح بتجنب التكرار وزيادة الطول."; bar.style.backgroundColor = "#f59e0b"; } 
-        else { feedback.innerText = "ضعيفة جداً! يسهل تخمينها، يرجى تغييرها فوراً."; bar.style.backgroundColor = "#ef4444"; }
-
-        // عرض القوائم ديناميكياً
-        strengthsList.innerHTML = strengths.length > 0 ? strengths.map(s => `<li>✔ ${s}</li>`).join('') : '<li>لا توجد نقاط قوة بارزة بعد.</li>';
-        weaknessesList.innerHTML = weaknesses.length > 0 ? weaknesses.map(w => `<li>✖ ${w}</li>`).join('') : '<li>لا توجد نقاط ضعف رئيسية، أحسنت!</li>';
+        // عرض القوائم
+        strengthsList.innerHTML = strengths.length ? strengths.map(s => `<li>${s}</li>`).join('') : "<li>لا توجد نقاط قوة بارزة.</li>";
+        weaknessesList.innerHTML = weaknesses.length ? weaknesses.map(w => `<li>${w}</li>`).join('') : "<li>لا توجد ملاحظات تحسين!</li>";
     }
 </script>
 </body>
