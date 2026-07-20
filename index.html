@@ -217,7 +217,7 @@
             margin: 15px auto 0 auto;
         }
 
-        /* تنسيق قسم الـ QR Code الجديد */
+        /* تنسيق قسم الـ QR Code */
         .qr-section {
             display: flex;
             flex-direction: column;
@@ -392,7 +392,7 @@
         </div>
     </div>
 
-    <!-- ================= قسم الـ QR Code الجديد أسفل المنصة ================= -->
+    <!-- ================= قسم الـ QR Code أسفل المنصة ================= -->
     <div class="qr-section">
         <p>امسح الـ QR Code لمشاركة وزيارة هذه المنصة عبر الجوال:</p>
         <div id="qrcode"></div>
@@ -401,7 +401,6 @@
 </div>
 
 <script>
-    // عند تحميل الصفحة، يتم التعرف على الرابط الحالي وتوليد الـ QR Code تلقائياً
     window.addEventListener('DOMContentLoaded', (event) => {
         const currentUrl = window.location.href;
         new QRCode(document.getElementById("qrcode"), {
@@ -685,7 +684,7 @@
 
         badge.innerText = c + "/100"; bar.style.width = c + "%";
 
-        if (c >= 90) { feedback.innerText = "ممتازة جداً! كلمة المرور قوية للغاية وتصعم مهاجمتها. 💪"; bar.style.backgroundColor = "#22c55e"; } 
+        if (c >= 90) { feedback.innerText = "ممتازة جداً! كلمة المرور قوية للغاية وتصعب مهاجمتها. 💪"; bar.style.backgroundColor = "#22c55e"; } 
         else if (c >= 75) { feedback.innerText = "جيدة! كلمة مرور قوية ولكن يمكن تحسينها بإضافة رموز."; bar.style.backgroundColor = "#3b82f6"; } 
         else if (c >= 50) { feedback.innerText = "متوسطة القوة، يُنصح بتجنب التكرار وزيادة الطول."; bar.style.backgroundColor = "#f59e0b"; } 
         else { feedback.innerText = "ضعيفة جداً! يسهل تخمينها، يرجى تغييرها فوراً."; bar.style.backgroundColor = "#ef4444"; }
