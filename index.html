@@ -14,6 +14,7 @@
             --text-main: #1e1e24;
             --text-muted: #65676b;
             --border-color: #e4e6eb;
+            --sidebar-width: 260px;
         }
 
         * {
@@ -26,36 +27,57 @@
         body {
             background-color: var(--bg-dark);
             color: var(--text-main);
-            padding: 40px 20px;
             min-height: 100vh;
             display: flex;
-            flex-direction: column;
-            align-items: center;
+            flex-direction: row;
         }
 
-        .container {
-            max-width: 800px;
+        /* تخطيط الصفحة مع الشريط الجانبي في الأيسر */
+        .app-container {
+            display: flex;
             width: 100%;
+            min-height: 100vh;
+        }
+
+        /* المحتوى الرئيسي على اليمين */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* الشريط الجانبي مثبت في اليسار */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--panel-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            order: 2; /* يضمن إبقاء الشريط في اليسار في نمط RTL */
         }
 
         .nav-menu {
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             gap: 12px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
         }
 
         .nav-btn {
             background-color: transparent;
             color: #1a1c3b;
-            padding: 12px 24px;
+            padding: 14px 18px;
             border: 2px solid #dbdee3;
-            border-radius: 30px;
-            font-size: 1rem;
+            border-radius: 12px;
+            font-size: 0.95rem;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.2s ease;
+            text-align: right;
+            width: 100%;
         }
 
         .nav-btn:hover {
@@ -217,185 +239,209 @@
             margin: 15px auto 0 auto;
         }
 
-        /* تنسيق قسم الـ QR Code */
+        /* تنسيق قسم الـ QR Code داخل الشريط الجانبي */
         .qr-section {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             text-align: center;
-            margin-top: 40px;
+            margin-top: 30px;
             padding-top: 20px;
             border-top: 2px dashed var(--border-color);
         }
         .qr-section p {
-            font-size: 0.95rem;
+            font-size: 0.85rem;
             color: var(--text-muted);
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             font-weight: 600;
         }
         #qrcode {
             background: white;
-            padding: 15px;
+            padding: 10px;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.05);
             border: 1px solid var(--border-color);
+        }
+
+        /* التكيف مع الشاشات الصغيرة */
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                order: 1;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+            .main-content {
+                order: 2;
+                padding: 20px;
+            }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
+<div class="app-container">
 
-    <div class="nav-menu">
-        <button id="btnPasswordPage" class="nav-btn active" onclick="switchPage('passwordPage')">تقييم كلمات السر</button>
-        <button id="btnCipherPage" class="nav-btn" onclick="switchPage('cipherPage')">تشفير او فك تشفير</button>
-        <button id="btnStegoPage" class="nav-btn" onclick="switchPage('stegoPage')">إخفاء البيانات في الصور (Steganography)</button>
+    <!-- المحتوى الرئيسي -->
+    <div class="main-content">
+
+        <!-- ================= الصفحة الأولى ================= -->
+        <div id="passwordPage" class="page-content active">
+            <div class="card">
+                <h2>لوحة تحليل وتقييم قوة كلمات السر</h2>
+                <div class="form-group">
+                    <label>أدخل كلمة السر للمحاكاة والتقييم الفوري:</label>
+                    <input type="password" id="passwordInput" oninput="evaluatePassword()" placeholder="اكتب كلمة السر هنا...">
+                </div>
+                <div style="margin: 25px 0;">
+                    <label>مستوى القوة الإجمالي:</label>
+                    <div class="strength-meter">
+                        <div id="strengthBar" class="strength-bar"></div>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between; background: #f5f6f8; padding: 20px; border-radius: 10px;">
+                    <div>
+                        <span style="color: var(--text-muted); font-size: 0.85rem; display: block; margin-bottom: 4px;">التحليل والنتيجة:</span>
+                        <div id="passwordFeedback">أدخل كلمة سر للتحليل الفوري...</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <span style="color: var(--text-muted); font-size: 0.85rem; display: block; margin-bottom: 5px;">الدرجة</span>
+                        <div id="scoreBadge">0/100</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= الصفحة الثانية ================= -->
+        <div id="cipherPage" class="page-content">
+            <div class="sub-menu">
+                <button id="subBtnEncrypt" class="sub-btn active" onclick="switchSubMode('encryptMode')">Encrypt (تشفير)</button>
+                <button id="subBtnDecrypt" class="sub-btn" onclick="switchSubMode('decryptMode')">Decrypt (فك تشفير)</button>
+            </div>
+
+            <div id="encryptMode" class="sub-content active">
+                <div class="card">
+                    <h2>أدوات تشفير النصوص المتقدمة</h2>
+                    <div class="form-group">
+                        <label>اختر نوع التشفير:</label>
+                        <select id="cipherSelectEnc" onchange="toggleCipherFields('Enc')">
+                            <option value="caesar">Caesar Cipher (تشفير قيصر)</option>
+                            <option value="vigenere">Vigenère Cipher (تشفير فيجينير)</option>
+                            <option value="rsa">RSA Cipher (المفتاح العام)</option>
+                        </select>
+                    </div>
+                    <div id="standardKeyGroupEnc" class="form-group">
+                        <label id="keyLabelEnc">أدخل المفتاح (رقم):</label>
+                        <input type="text" id="cipherKeyEnc" value="3">
+                    </div>
+                    <div id="rsaInputsEnc" style="display: none;">
+                        <div class="form-group"><label>العدد الأولي الأول (P):</label><input type="number" id="rsaPEnc" value="61"></div>
+                        <div class="form-group"><label>العدد الأولي الثاني (Q):</label><input type="number" id="rsaQEnc" value="53"></div>
+                        <div class="form-group"><label>المفتاح العلني (E):</label><input type="number" id="rsaEEnc" value="17"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>النص المراد تشفيره:</label>
+                        <textarea id="cipherInputEnc" rows="2" placeholder="اكتب النص المراد تشفيره هنا..."></textarea>
+                    </div>
+                    <button class="action-btn btn-purple" onclick="processCipher(true)">تشفير النص</button>
+                    <div class="output-box">
+                        <strong>النص المشفر الناتج:</strong>
+                        <div id="cipherOutputEnc" style="margin-top: 8px;">بانتظار المدخلات...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="decryptMode" class="sub-content">
+                <div class="card">
+                    <h2>أدوات فك تشفير النصوص</h2>
+                    <div class="form-group">
+                        <label>اختر نوع التشفير:</label>
+                        <select id="cipherSelectDec" onchange="toggleCipherFields('Dec')">
+                            <option value="caesar">Caesar Cipher (تشفير قيصر)</option>
+                            <option value="vigenere">Vigenère Cipher (تشفير فيجينير)</option>
+                            <option value="rsa">RSA Cipher (المفتاح العام)</option>
+                        </select>
+                    </div>
+                    <div id="standardKeyGroupDec" class="form-group">
+                        <label id="keyLabelDec">أدخل المفتاح:</label>
+                        <input type="text" id="cipherKeyDec" value="3">
+                    </div>
+                    <div id="rsaInputsDec" style="display: none;">
+                        <div class="form-group"><label>العدد الأولي الأول (P):</label><input type="number" id="rsaPDec" value="61"></div>
+                        <div class="form-group"><label>العدد الأولي الثاني (Q):</label><input type="number" id="rsaQDec" value="53"></div>
+                        <div class="form-group"><label>المفتاح الخاص لفك التشفير (D):</label><input type="number" id="rsaDDec" placeholder="أدخل قيمة D"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>النص المشفر المطلوب معالجته:</label>
+                        <textarea id="cipherInputDec" rows="2" placeholder="أصق النص المشفر هنا..."></textarea>
+                    </div>
+                    <button class="action-btn btn-purple" onclick="processCipher(false)">فك التشفير الآن</button>
+                    <div class="output-box">
+                        <strong>النص الأصلي المستخرج:</strong>
+                        <div id="cipherOutputDec" style="margin-top: 8px;">بانتظار المدخلات...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= الصفحة الثالثة ================= -->
+        <div id="stegoPage" class="page-content">
+            <div class="sub-menu">
+                <button id="subBtnStegoEncrypt" class="sub-btn active" onclick="switchStegoSubMode('stegoEncryptMode')">Encrypt (إخفاء)</button>
+                <button id="subBtnStegoDecrypt" class="sub-btn" onclick="switchStegoSubMode('stegoDecryptMode')">Decrypt (استخراج)</button>
+            </div>
+
+            <div id="stegoEncryptMode" class="sub-content active">
+                <div class="card">
+                    <h2>حفر وإخفاء رسالة سرية داخل صورة (يدعم العربية)</h2>
+                    <div class="form-group">
+                        <label>اختر الصورة الأساسية (PNG لضمان الدقة):</label>
+                        <input type="file" id="imageLoaderEnc" accept="image/*" onchange="handleImage(event, 'stegoCanvasEnc')">
+                        <canvas id="stegoCanvasEnc"></canvas>
+                    </div>
+                    <div class="form-group">
+                        <label>الرسالة السرية المراد إخفاؤها (بالعربي أو الإنجليزي):</label>
+                        <textarea id="stegoMessageEnc" rows="2" placeholder="اكتب رسالتك السرية هنا باللغة العربية..."></textarea>
+                    </div>
+                    <button class="action-btn btn-purple" onclick="hideMessage()">حفر الرسالة وتحميل الصورة المحدثة</button>
+                </div>
+            </div>
+
+            <div id="stegoDecryptMode" class="sub-content">
+                <div class="card">
+                    <h2>استخراج وفك قراءة رسالة مخفية من صورة</h2>
+                    <div class="form-group">
+                        <label>ارفع الصورة المحدثة المحتوية على النص المخفي:</label>
+                        <input type="file" id="imageLoaderDec" accept="image/*" onchange="handleImage(event, 'stegoCanvasDec')">
+                        <canvas id="stegoCanvasDec"></canvas>
+                    </div>
+                    <button class="action-btn btn-dark" onclick="revealMessage()">قراءة واستخراج النص المخفي</button>
+                    <div class="output-box">
+                        <strong>الرسالة المستخرجة المكتشفة:</strong>
+                        <div id="stegoOutputDec" style="margin-top: 8px;">لم يتم استخراج أي بيانات بعد...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <!-- ================= الصفحة الأولى ================= -->
-    <div id="passwordPage" class="page-content active">
-        <div class="card">
-            <h2>لوحة تحليل وتقييم قوة كلمات السر</h2>
-            <div class="form-group">
-                <label>أدخل كلمة السر للمحاكاة والتقييم الفوري:</label>
-                <input type="password" id="passwordInput" oninput="evaluatePassword()" placeholder="اكتب كلمة السر هنا...">
-            </div>
-            <div style="margin: 25px 0;">
-                <label>مستوى القوة الإجمالي:</label>
-                <div class="strength-meter">
-                    <div id="strengthBar" class="strength-bar"></div>
-                </div>
-            </div>
-            <div style="display: flex; align-items: center; justify-content: space-between; background: #f5f6f8; padding: 20px; border-radius: 10px;">
-                <div>
-                    <span style="color: var(--text-muted); font-size: 0.85rem; display: block; margin-bottom: 4px;">التحليل والنتيجة:</span>
-                    <div id="passwordFeedback">أدخل كلمة سر للتحليل الفوري...</div>
-                </div>
-                <div style="text-align: center;">
-                    <span style="color: var(--text-muted); font-size: 0.85rem; display: block; margin-bottom: 5px;">الدرجة</span>
-                    <div id="scoreBadge">0/100</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ================= الصفحة الثانية ================= -->
-    <div id="cipherPage" class="page-content">
-        <div class="sub-menu">
-            <button id="subBtnEncrypt" class="sub-btn active" onclick="switchSubMode('encryptMode')">Encrypt (تشفير)</button>
-            <button id="subBtnDecrypt" class="sub-btn" onclick="switchSubMode('decryptMode')">Decrypt (فك تشفير)</button>
+    <!-- الشريط الجانبي (على اليسار) -->
+    <div class="sidebar">
+        <div class="nav-menu">
+            <button id="btnPasswordPage" class="nav-btn active" onclick="switchPage('passwordPage')">تقييم كلمات السر</button>
+            <button id="btnCipherPage" class="nav-btn" onclick="switchPage('cipherPage')">تشفير أو فك التشفير</button>
+            <button id="btnStegoPage" class="nav-btn" onclick="switchPage('stegoPage')">إخفاء البيانات في الصور (Steganography)</button>
         </div>
 
-        <div id="encryptMode" class="sub-content active">
-            <div class="card">
-                <h2>أدوات تشفير النصوص المتقدمة</h2>
-                <div class="form-group">
-                    <label>اختر نوع التشفير:</label>
-                    <select id="cipherSelectEnc" onchange="toggleCipherFields('Enc')">
-                        <option value="caesar">Caesar Cipher (تشفير قيصر)</option>
-                        <option value="vigenere">Vigenère Cipher (تشفير فيجينير)</option>
-                        <option value="rsa">RSA Cipher (المفتاح العام)</option>
-                    </select>
-                </div>
-                <div id="standardKeyGroupEnc" class="form-group">
-                    <label id="keyLabelEnc">أدخل المفتاح (رقم):</label>
-                    <input type="text" id="cipherKeyEnc" value="3">
-                </div>
-                <div id="rsaInputsEnc" style="display: none;">
-                    <div class="form-group"><label>العدد الأولي الأول (P):</label><input type="number" id="rsaPEnc" value="61"></div>
-                    <div class="form-group"><label>العدد الأولي الثاني (Q):</label><input type="number" id="rsaQEnc" value="53"></div>
-                    <div class="form-group"><label>المفتاح العلني (E):</label><input type="number" id="rsaEEnc" value="17"></div>
-                </div>
-                <div class="form-group">
-                    <label>النص المراد تشفيره:</label>
-                    <textarea id="cipherInputEnc" rows="2" placeholder="اكتب النص المراد تشفيره هنا..."></textarea>
-                </div>
-                <button class="action-btn btn-purple" onclick="processCipher(true)">تشفير النص</button>
-                <div class="output-box">
-                    <strong>النص المشفر الناتج:</strong>
-                    <div id="cipherOutputEnc" style="margin-top: 8px;">بانتظار المدخلات...</div>
-                </div>
-            </div>
+        <div class="qr-section">
+            <p>امسح الـ QR للزيارة:</p>
+            <div id="qrcode"></div>
         </div>
-
-        <div id="decryptMode" class="sub-content">
-            <div class="card">
-                <h2>أدوات فك تشفير النصوص</h2>
-                <div class="form-group">
-                    <label>اختر نوع التشفير:</label>
-                    <select id="cipherSelectDec" onchange="toggleCipherFields('Dec')">
-                        <option value="caesar">Caesar Cipher (تشفير قيصر)</option>
-                        <option value="vigenere">Vigenère Cipher (تشفير فيجينير)</option>
-                        <option value="rsa">RSA Cipher (المفتاح العام)</option>
-                    </select>
-                </div>
-                <div id="standardKeyGroupDec" class="form-group">
-                    <label id="keyLabelDec">أدخل المفتاح:</label>
-                    <input type="text" id="cipherKeyDec" value="3">
-                </div>
-                <div id="rsaInputsDec" style="display: none;">
-                    <div class="form-group"><label>العدد الأولي الأول (P):</label><input type="number" id="rsaPDec" value="61"></div>
-                    <div class="form-group"><label>العدد الأولي الثاني (Q):</label><input type="number" id="rsaQDec" value="53"></div>
-                    <div class="form-group"><label>المفتاح الخاص لفك التشفير (D):</label><input type="number" id="rsaDDec" placeholder="أدخل قيمة D"></div>
-                </div>
-                <div class="form-group">
-                    <label>النص المشفر المطلوب معالجته:</label>
-                    <textarea id="cipherInputDec" rows="2" placeholder="أصق النص المشفر هنا..."></textarea>
-                </div>
-                <button class="action-btn btn-purple" onclick="processCipher(false)">فك التشفير الآن</button>
-                <div class="output-box">
-                    <strong>النص الأصلي المستخرج:</strong>
-                    <div id="cipherOutputDec" style="margin-top: 8px;">بانتظار المدخلات...</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ================= الصفحة الثالثة ================= -->
-    <div id="stegoPage" class="page-content">
-        <div class="sub-menu">
-            <button id="subBtnStegoEncrypt" class="sub-btn active" onclick="switchStegoSubMode('stegoEncryptMode')">Encrypt (إخفاء)</button>
-            <button id="subBtnStegoDecrypt" class="sub-btn" onclick="switchStegoSubMode('stegoDecryptMode')">Decrypt (استخراج)</button>
-        </div>
-
-        <div id="stegoEncryptMode" class="sub-content active">
-            <div class="card">
-                <h2>حفر وإخفاء رسالة سرية داخل صورة (يدعم العربية)</h2>
-                <div class="form-group">
-                    <label>اختر الصورة الأساسية (PNG لضمان الدقة):</label>
-                    <input type="file" id="imageLoaderEnc" accept="image/*" onchange="handleImage(event, 'stegoCanvasEnc')">
-                    <canvas id="stegoCanvasEnc"></canvas>
-                </div>
-                <div class="form-group">
-                    <label>الرسالة السرية المراد إخفاؤها (بالعربي أو الإنجليزي):</label>
-                    <textarea id="stegoMessageEnc" rows="2" placeholder="اكتب رسالتك السرية هنا باللغة العربية..."></textarea>
-                </div>
-                <button class="action-btn btn-purple" onclick="hideMessage()">حفر الرسالة وتحميل الصورة المحدثة</button>
-            </div>
-        </div>
-
-        <div id="stegoDecryptMode" class="sub-content">
-            <div class="card">
-                <h2>استخراج وفك قراءة رسالة مخفية من صورة</h2>
-                <div class="form-group">
-                    <label>ارفع الصورة المحدثة المحتوية على النص المخفي:</label>
-                    <input type="file" id="imageLoaderDec" accept="image/*" onchange="handleImage(event, 'stegoCanvasDec')">
-                    <canvas id="stegoCanvasDec"></canvas>
-                </div>
-                <button class="action-btn btn-dark" onclick="revealMessage()">قراءة واستخراج النص المخفي</button>
-                <div class="output-box">
-                    <strong>الرسالة المستخرجة المكتشفة:</strong>
-                    <div id="stegoOutputDec" style="margin-top: 8px;">لم يتم استخراج أي بيانات بعد...</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ================= قسم الـ QR Code أسفل المنصة ================= -->
-    <div class="qr-section">
-        <p>امسح الـ QR Code لمشاركة وزيارة هذه المنصة عبر الجوال:</p>
-        <div id="qrcode"></div>
     </div>
 
 </div>
@@ -405,8 +451,8 @@
         const currentUrl = window.location.href;
         new QRCode(document.getElementById("qrcode"), {
             text: currentUrl,
-            width: 140,
-            height: 140,
+            width: 120,
+            height: 120,
             colorDark : "#1a1c3b",
             colorLight : "#ffffff",
             correctLevel : QRCode.CorrectLevel.H
