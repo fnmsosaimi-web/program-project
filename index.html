@@ -480,6 +480,7 @@
                     <div id="panelRsaDec" class="cipher-panel">
                         <div class="form-group"><label>العدد الأولي الأول (P):</label><input type="number" id="rsaPDec" value="61"></div>
                         <div class="form-group"><label>العدد الأولي الثاني (Q):</label><input type="number" id="rsaQDec" value="53"></div>
+                        <div class="form-group"><label>المفتاح العلني (E):</label><input type="number" id="rsaEDec" value="17"></div>
                         <div class="form-group"><label>المفتاح الخاص لفك التشفير (D):</label><input type="number" id="rsaDDec" placeholder="أدخل قيمة D"></div>
                     </div>
 
@@ -800,19 +801,83 @@
         return Number(res);
     }
 
+    // --- دوال التحقق الرياضي لـ RSA ---
+    function isPrime(num) {
+        if (num <= 1) return false;
+        if (num <= 3) return true;
+        if (num % 2 === 0 || num % 3 === 0) return false;
+        for (let i = 5; i * i <= num; i += 6) {
+            if (num % i === 0 || num % (i + 2) === 0) return false;
+        }
+        return true;
+    }
+
+    function gcd(a, b) {
+        a = BigInt(a);
+        b = BigInt(b);
+        while (b !== 0n) {
+            let t = b;
+            b = a % b;
+            a = t;
+        }
+        return Number(a);
+    }
+
     function rsaCipher(m, isEncrypt, suffix) {
         const p = parseInt(document.getElementById('rsaP' + suffix).value);
         const q = parseInt(document.getElementById('rsaQ' + suffix).value);
+
+        if (isNaN(p) || isNaN(q)) {
+            return "خطأ: يرجى إدخال قيم صالحة لكل من P و Q.";
+        }
+
+        // 1. التحقق من أن P و Q أعداد أولية
+        if (!isPrime(p)) {
+            return `خطأ: العدد P (${p}) ليس عدداً أولياً!`;
+        }
+        if (!isPrime(q)) {
+            return `خطأ: العدد Q (${q}) ليس عدداً أولياً!`;
+        }
+        if (p === q) {
+            return "خطأ: يجب أن يكون P و Q عددين أوليين مختلفين!";
+        }
+
         const n = p * q;
+        const phi = (p - 1) * (q - 1);
 
         if (isEncrypt) {
             const e = parseInt(document.getElementById('rsaEEnc').value);
+            if (isNaN(e)) return "خطأ: يرجى إدخال قيمة E.";
+
+            // 2. التحقق من أن E و phi(n) أوليان نسبياً (gcd == 1)
+            if (gcd(e, phi) !== 1) {
+                return `خطأ: المفتاح E (${e}) ليس أولياً نسبياً مع φ(n) = ${phi}. القاسم المشترك الأكبر هو ${gcd(e, phi)}.`;
+            }
+
             let encArr = [];
             for (let i = 0; i < m.length; i++) encArr.push(power(m.charCodeAt(i), e, n));
             return encArr.join(" ");
         } else {
+            const e = parseInt(document.getElementById('rsaEDec').value);
             const d = parseInt(document.getElementById('rsaDDec').value);
-            if (!d) return "خطأ: يجب إدخال قيمة d لفك التشفير الرياضي.";
+
+            if (isNaN(e)) return "خطأ: يرجى إدخال قيمة E لفك التشفير.";
+            if (isNaN(d)) return "خطأ: يجب إدخال قيمة D لفك التشفير.";
+
+            // 2. التحقق من أن E و phi(n) أوليان نسبياً
+            if (gcd(e, phi) !== 1) {
+                return `خطأ: المفتاح E (${e}) ليس أولياً نسبياً مع φ(n) = ${phi}.`;
+            }
+
+            // 3. التحقق من أن (E * D) % phi(n) == 1
+            const bigE = BigInt(e);
+            const bigD = BigInt(d);
+            const bigPhi = BigInt(phi);
+
+            if ((bigE * bigD) % bigPhi !== 1n) {
+                return `خطأ: قيمة D (${d}) غير صحيحة! الشرط ((E × D) mod φ(n) = 1) لم يتحقق.\nناتج باقي القسمة الحالي: ${Number((bigE * bigD) % bigPhi)}`;
+            }
+
             let nums = m.trim().split(/\s+/); let decStr = "";
             for (let i = 0; i < nums.length; i++) {
                 if(nums[i] === "") continue;
@@ -845,7 +910,6 @@
         let weaknesses = [];
         let score = 0;
 
-        // 1. فحص الطول
         if (p.length >= 12) {
             score += 35;
             strengths.push("طول كلمة السر ممتاز (12 حرفًا أو أكثر).");
@@ -858,7 +922,6 @@
             weaknesses.push("كلمة السر قصيرة جدًا (أقل من 8 أحرف).");
         }
 
-        // 2. الأحرف الكبيرة
         if (/[A-Z]/.test(p)) {
             score += 15;
             strengths.push("تحتوي على أحرف إنجليزية كبيرة (A-Z).");
@@ -866,7 +929,6 @@
             weaknesses.push("لا تحتوي على أحرف إنجليزية كبيرة.");
         }
 
-        // 3. الأحرف الصغيرة
         if (/[a-z]/.test(p)) {
             score += 15;
             strengths.push("تحتوي على أحرف إنجليزية صغيرة (a-z).");
@@ -874,7 +936,6 @@
             weaknesses.push("لا تحتوي على أحرف إنجليزية صغيرة.");
         }
 
-        // 4. الأرقام
         if (/[0-9]/.test(p)) {
             score += 15;
             strengths.push("تحتوي على أرقام (0-9).");
@@ -882,7 +943,6 @@
             weaknesses.push("لا تحتوي على أرقام.");
         }
 
-        // 5. الرموز الخاصة
         if (/[^A-Za-z0-9]/.test(p)) {
             score += 20;
             strengths.push("تحتوي على رموز خاصة (!@#$%^&*...).");
@@ -890,10 +950,8 @@
             weaknesses.push("أضف رموزًا خاصة لزيادة الأمان.");
         }
 
-        // ضمان القيمة بين 0 و 100
         score = Math.min(100, Math.max(0, score));
 
-        // تحديث شريط القوة والألوان
         bar.style.width = score + "%";
         badge.innerText = score + "/100";
 
@@ -911,7 +969,6 @@
             feedback.style.color = "#059669";
         }
 
-        // عرض القوائم
         strengthsList.innerHTML = strengths.length ? strengths.map(s => `<li>${s}</li>`).join('') : "<li>لا توجد نقاط قوة بارزة.</li>";
         weaknessesList.innerHTML = weaknesses.length ? weaknesses.map(w => `<li>${w}</li>`).join('') : "<li>لا توجد ملاحظات تحسين!</li>";
     }
