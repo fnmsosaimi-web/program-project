@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>المنصة الأمنية المتكاملة</title>
-    <!-- استدعاء مكتبة توليد الـ QR Code الخارجية -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root {
@@ -32,14 +31,12 @@
             flex-direction: row;
         }
 
-        /* تخطيط الصفحة مع الشريط الجانبي في الأيسر */
         .app-container {
             display: flex;
             width: 100%;
             min-height: 100vh;
         }
 
-        /* المحتوى الرئيسي على اليمين */
         .main-content {
             flex: 1;
             padding: 40px;
@@ -48,7 +45,6 @@
             margin: 0 auto;
         }
 
-        /* الشريط الجانبي مثبت في اليسار */
         .sidebar {
             width: var(--sidebar-width);
             background-color: var(--panel-bg);
@@ -57,7 +53,7 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            order: 2; /* يضمن إبقاء الشريط في اليسار في نمط RTL */
+            order: 2;
         }
 
         .nav-menu {
@@ -90,11 +86,12 @@
             border-color: var(--accent-purple);
         }
 
+        /* تنسيق التاب العلوية الرئيسية (تشفير / فك تشفير) */
         .sub-menu {
             display: flex;
             justify-content: center;
             gap: 10px;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
 
         .sub-btn {
@@ -115,11 +112,44 @@
             border-color: var(--accent-purple);
         }
 
-        .page-content, .sub-content {
+        /* تنسيق تابات أنواع التشفير الفرعية */
+        .cipher-type-tabs {
+            display: flex;
+            justify-content: flex-start;
+            gap: 8px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .cipher-tab-btn {
+            background-color: #f5f6f8;
+            color: var(--text-muted);
+            padding: 10px 18px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .cipher-tab-btn:hover {
+            border-color: var(--accent-purple);
+            color: var(--accent-purple);
+        }
+
+        .cipher-tab-btn.active {
+            background-color: var(--accent-purple);
+            color: white;
+            border-color: var(--accent-purple);
+        }
+
+        .page-content, .sub-content, .cipher-panel {
             display: none;
         }
 
-        .page-content.active, .sub-content.active {
+        .page-content.active, .sub-content.active, .cipher-panel.active {
             display: block;
         }
 
@@ -133,7 +163,7 @@
         }
 
         .card h2 {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             color: #1a1c3b;
             font-size: 1.3rem;
             border-bottom: 1px solid var(--border-color);
@@ -239,7 +269,6 @@
             margin: 15px auto 0 auto;
         }
 
-        /* تنسيق قسم الـ QR Code داخل الشريط الجانبي */
         .qr-section {
             display: flex;
             flex-direction: column;
@@ -264,7 +293,6 @@
             border: 1px solid var(--border-color);
         }
 
-        /* التكيف مع الشاشات الصغيرة */
         @media (max-width: 768px) {
             .app-container {
                 flex-direction: column;
@@ -279,6 +307,9 @@
                 order: 2;
                 padding: 20px;
             }
+            .cipher-type-tabs {
+                flex-wrap: wrap;
+            }
         }
     </style>
 </head>
@@ -289,7 +320,7 @@
     <!-- المحتوى الرئيسي -->
     <div class="main-content">
 
-        <!-- ================= الصفحة الأولى ================= -->
+        <!-- ================= الصفحة الأولى: تقييم كلمات السر ================= -->
         <div id="passwordPage" class="page-content active">
             <div class="card">
                 <h2>لوحة تحليل وتقييم قوة كلمات السر</h2>
@@ -316,36 +347,54 @@
             </div>
         </div>
 
-        <!-- ================= الصفحة الثانية ================= -->
+        <!-- ================= الصفحة الثانية: تشفير أو فك التشفير ================= -->
         <div id="cipherPage" class="page-content">
+            
+            <!-- التبويبات العلوية: Encrypt / Decrypt -->
             <div class="sub-menu">
                 <button id="subBtnEncrypt" class="sub-btn active" onclick="switchSubMode('encryptMode')">Encrypt (تشفير)</button>
                 <button id="subBtnDecrypt" class="sub-btn" onclick="switchSubMode('decryptMode')">Decrypt (فك تشفير)</button>
             </div>
 
+            <!-- ================= قسم التشفير Encrypt ================= -->
             <div id="encryptMode" class="sub-content active">
                 <div class="card">
                     <h2>أدوات تشفير النصوص المتقدمة</h2>
-                    <div class="form-group">
-                        <label>اختر نوع التشفير:</label>
-                        <select id="cipherSelectEnc" onchange="toggleCipherFields('Enc')">
-                            <option value="caesar">Caesar Cipher (تشفير قيصر)</option>
-                            <option value="vigenere">Vigenère Cipher (تشفير فيجينير)</option>
-                            <option value="rsa">RSA Cipher (المفتاح العام)</option>
-                        </select>
+                    
+                    <!-- تابات خوارزميات التشفير -->
+                    <div class="cipher-type-tabs">
+                        <button class="cipher-tab-btn active" onclick="selectCipherType('Enc', 'caesar', this)">Caesar Cipher</button>
+                        <button class="cipher-tab-btn" onclick="selectCipherType('Enc', 'vigenere', this)">Vigenère Cipher</button>
+                        <button class="cipher-tab-btn" onclick="selectCipherType('Enc', 'rsa', this)">RSA Cipher</button>
                     </div>
-                    <div id="standardKeyGroupEnc" class="form-group">
-                        <label id="keyLabelEnc">أدخل المفتاح (رقم):</label>
-                        <input type="text" id="cipherKeyEnc" value="3">
+
+                    <!-- خيار القيصر -->
+                    <div id="panelCaesarEnc" class="cipher-panel active">
+                        <div class="form-group">
+                            <label>مفتاح الازاحة (رقم):</label>
+                            <input type="number" id="caesarKeyEnc" value="3">
+                        </div>
                     </div>
-                    <div id="rsaInputsEnc" style="display: none;">
+
+                    <!-- خيار فيجينير -->
+                    <div id="panelVigenereEnc" class="cipher-panel">
+                        <div class="form-group">
+                            <label>المفتاح النصي (كلمة السر):</label>
+                            <input type="text" id="vigenereKeyEnc" value="KEY">
+                        </div>
+                    </div>
+
+                    <!-- خيار RSA -->
+                    <div id="panelRsaEnc" class="cipher-panel">
                         <div class="form-group"><label>العدد الأولي الأول (P):</label><input type="number" id="rsaPEnc" value="61"></div>
                         <div class="form-group"><label>العدد الأولي الثاني (Q):</label><input type="number" id="rsaQEnc" value="53"></div>
                         <div class="form-group"><label>المفتاح العلني (E):</label><input type="number" id="rsaEEnc" value="17"></div>
                     </div>
+
+                    <!-- مدخلات النص والمخرجات -->
                     <div class="form-group">
                         <label>النص المراد تشفيره:</label>
-                        <textarea id="cipherInputEnc" rows="2" placeholder="اكتب النص المراد تشفيره هنا..."></textarea>
+                        <textarea id="cipherInputEnc" rows="3" placeholder="اكتب النص المراد تشفيره هنا..."></textarea>
                     </div>
                     <button class="action-btn btn-purple" onclick="processCipher(true)">تشفير النص</button>
                     <div class="output-box">
@@ -355,29 +404,45 @@
                 </div>
             </div>
 
+            <!-- ================= قسم فك التشفير Decrypt ================= -->
             <div id="decryptMode" class="sub-content">
                 <div class="card">
                     <h2>أدوات فك تشفير النصوص</h2>
-                    <div class="form-group">
-                        <label>اختر نوع التشفير:</label>
-                        <select id="cipherSelectDec" onchange="toggleCipherFields('Dec')">
-                            <option value="caesar">Caesar Cipher (تشفير قيصر)</option>
-                            <option value="vigenere">Vigenère Cipher (تشفير فيجينير)</option>
-                            <option value="rsa">RSA Cipher (المفتاح العام)</option>
-                        </select>
+
+                    <!-- تابات خوارزميات فك التشفير -->
+                    <div class="cipher-type-tabs">
+                        <button class="cipher-tab-btn active" onclick="selectCipherType('Dec', 'caesar', this)">Caesar Cipher</button>
+                        <button class="cipher-tab-btn" onclick="selectCipherType('Dec', 'vigenere', this)">Vigenère Cipher</button>
+                        <button class="cipher-tab-btn" onclick="selectCipherType('Dec', 'rsa', this)">RSA Cipher</button>
                     </div>
-                    <div id="standardKeyGroupDec" class="form-group">
-                        <label id="keyLabelDec">أدخل المفتاح:</label>
-                        <input type="text" id="cipherKeyDec" value="3">
+
+                    <!-- خيار القيصر -->
+                    <div id="panelCaesarDec" class="cipher-panel active">
+                        <div class="form-group">
+                            <label>مفتاح الازاحة المستخدم (رقم):</label>
+                            <input type="number" id="caesarKeyDec" value="3">
+                        </div>
                     </div>
-                    <div id="rsaInputsDec" style="display: none;">
+
+                    <!-- خيار فيجينير -->
+                    <div id="panelVigenereDec" class="cipher-panel">
+                        <div class="form-group">
+                            <label>المفتاح النصي المستخدم:</label>
+                            <input type="text" id="vigenereKeyDec" value="KEY">
+                        </div>
+                    </div>
+
+                    <!-- خيار RSA -->
+                    <div id="panelRsaDec" class="cipher-panel">
                         <div class="form-group"><label>العدد الأولي الأول (P):</label><input type="number" id="rsaPDec" value="61"></div>
                         <div class="form-group"><label>العدد الأولي الثاني (Q):</label><input type="number" id="rsaQDec" value="53"></div>
                         <div class="form-group"><label>المفتاح الخاص لفك التشفير (D):</label><input type="number" id="rsaDDec" placeholder="أدخل قيمة D"></div>
                     </div>
+
+                    <!-- مدخلات النص والمخرجات -->
                     <div class="form-group">
                         <label>النص المشفر المطلوب معالجته:</label>
-                        <textarea id="cipherInputDec" rows="2" placeholder="أصق النص المشفر هنا..."></textarea>
+                        <textarea id="cipherInputDec" rows="3" placeholder="أصق النص المشفر هنا..."></textarea>
                     </div>
                     <button class="action-btn btn-purple" onclick="processCipher(false)">فك التشفير الآن</button>
                     <div class="output-box">
@@ -386,9 +451,10 @@
                     </div>
                 </div>
             </div>
+
         </div>
 
-        <!-- ================= الصفحة الثالثة ================= -->
+        <!-- ================= الصفحة الثالثة: Steganography ================= -->
         <div id="stegoPage" class="page-content">
             <div class="sub-menu">
                 <button id="subBtnStegoEncrypt" class="sub-btn active" onclick="switchStegoSubMode('stegoEncryptMode')">Encrypt (إخفاء)</button>
@@ -430,7 +496,7 @@
 
     </div>
 
-    <!-- الشريط الجانبي (على اليسار) -->
+    <!-- الشريط الجانبي (يسار) -->
     <div class="sidebar">
         <div class="nav-menu">
             <button id="btnPasswordPage" class="nav-btn active" onclick="switchPage('passwordPage')">تقييم كلمات السر</button>
@@ -447,6 +513,10 @@
 </div>
 
 <script>
+    // تتبع الخوارزمية المختارة حالياً للتشفير وفك التشفير
+    let selectedCipherEnc = 'caesar';
+    let selectedCipherDec = 'caesar';
+
     window.addEventListener('DOMContentLoaded', (event) => {
         const currentUrl = window.location.href;
         new QRCode(document.getElementById("qrcode"), {
@@ -484,12 +554,27 @@
         else document.getElementById('subBtnStegoDecrypt').classList.add('active');
     }
 
-    function toggleCipherFields(suffix) {
-        const type = document.getElementById('cipherSelect' + suffix).value;
-        document.getElementById('standardKeyGroup' + suffix).style.display = type === 'rsa' ? 'none' : 'block';
-        document.getElementById('rsaInputs' + suffix).style.display = type === 'rsa' ? 'block' : 'none';
-        if (type === 'caesar') document.getElementById('keyLabel' + suffix).innerText = "أدخل المفتاح (رقم):";
-        if (type === 'vigenere') document.getElementById('keyLabel' + suffix).innerText = "أدخل المفتاح (نص):";
+    // التبديل بين تابات التشفير (Caesar, Vigenere, RSA)
+    function selectCipherType(suffix, cipherType, btnElement) {
+        if (suffix === 'Enc') selectedCipherEnc = cipherType;
+        else selectedCipherDec = cipherType;
+
+        // تحديث زر التاب النشط
+        const parent = btnElement.parentElement;
+        parent.querySelectorAll('.cipher-tab-btn').forEach(btn => btn.classList.remove('active'));
+        btnElement.classList.add('active');
+
+        // إخفاء/إظهار لوحات الخيارات الخاصة بكل نوع
+        const targetContainer = document.getElementById(suffix === 'Enc' ? 'encryptMode' : 'decryptMode');
+        targetContainer.querySelectorAll('.cipher-panel').forEach(panel => panel.classList.remove('active'));
+
+        if (cipherType === 'caesar') {
+            document.getElementById('panelCaesar' + suffix).classList.add('active');
+        } else if (cipherType === 'vigenere') {
+            document.getElementById('panelVigenere' + suffix).classList.add('active');
+        } else if (cipherType === 'rsa') {
+            document.getElementById('panelRsa' + suffix).classList.add('active');
+        }
     }
 
     function handleImage(e, canvasId) {
@@ -534,7 +619,7 @@
         bitString += "00000000000000000000000000000000"; 
 
         if (bitString.length > data.length * 0.75) {
-            alert("حجم النص العربي ضخم جداً بالنسبة لهذه الصورة، يرجى استخدام صورة أكبر.");
+            alert("حجم النص ضخم جداً بالنسبة لهذه الصورة، يرجى استخدام صورة أكبر.");
             return;
         }
 
@@ -589,22 +674,22 @@
             
             document.getElementById('stegoOutputDec').innerText = decodedMsg.trim() ? decodedMsg : "لم يتم العثور على أي رسائل مخفية داخل هذه الصورة.";
         } catch (e) {
-            document.getElementById('stegoOutputDec').innerText = "حدث خطأ أثناء فك ترميز البيانات، قد تكون الصورة تالفة أو مضغوطة.";
+            document.getElementById('stegoOutputDec').innerText = "حدث خطأ أثناء فك ترميز البيانات.";
         }
     }
 
     function processCipher(isEncrypt) {
         const suffix = isEncrypt ? 'Enc' : 'Dec';
-        const type = document.getElementById('cipherSelect' + suffix).value;
+        const type = isEncrypt ? selectedCipherEnc : selectedCipherDec;
         const input = document.getElementById('cipherInput' + suffix).value;
         let output = "";
 
         if (type === 'caesar') {
-            let k = parseInt(document.getElementById('cipherKey' + suffix).value) || 0;
+            let k = parseInt(document.getElementById('caesarKey' + suffix).value) || 0;
             if (!isEncrypt) k = -k;
             output = caesarCipher(input, k);
         } else if (type === 'vigenere') {
-            const key = document.getElementById('cipherKey' + suffix).value;
+            const key = document.getElementById('vigenereKey' + suffix).value;
             output = vigenereCipher(input, key, isEncrypt);
         } else if (type === 'rsa') {
             output = rsaCipher(input, isEncrypt, suffix);
