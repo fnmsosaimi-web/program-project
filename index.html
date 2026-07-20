@@ -59,7 +59,7 @@
         .nav-menu {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
         }
 
         .nav-btn {
@@ -86,12 +86,52 @@
             border-color: var(--accent-purple);
         }
 
+        /* تنسيق القائمة الفرعية لأنواع التشفير داخل الشريط الجانبي الأيسر */
+        .sidebar-sub-menu {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            padding-right: 12px;
+            margin-top: 2px;
+            margin-bottom: 6px;
+            border-right: 3px solid var(--accent-purple);
+        }
+
+        .sidebar-sub-menu.open {
+            display: flex;
+        }
+
+        .sidebar-sub-btn {
+            background-color: #f5f6f8;
+            color: var(--text-muted);
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: right;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-sub-btn:hover {
+            border-color: var(--accent-purple);
+            color: var(--accent-purple);
+        }
+
+        .sidebar-sub-btn.active {
+            background-color: #eef2ff;
+            color: var(--accent-purple);
+            border-color: var(--accent-purple);
+            font-weight: 700;
+        }
+
         /* تنسيق التاب العلوية الرئيسية (تشفير / فك تشفير) */
         .sub-menu {
             display: flex;
             justify-content: center;
             gap: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
         .sub-btn {
@@ -109,39 +149,6 @@
         .sub-btn.active {
             background-color: #eef2ff;
             color: var(--accent-purple);
-            border-color: var(--accent-purple);
-        }
-
-        /* تنسيق تابات أنواع التشفير الفرعية */
-        .cipher-type-tabs {
-            display: flex;
-            justify-content: flex-start;
-            gap: 8px;
-            margin-bottom: 20px;
-            border-bottom: 2px solid var(--border-color);
-            padding-bottom: 10px;
-        }
-
-        .cipher-tab-btn {
-            background-color: #f5f6f8;
-            color: var(--text-muted);
-            padding: 10px 18px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .cipher-tab-btn:hover {
-            border-color: var(--accent-purple);
-            color: var(--accent-purple);
-        }
-
-        .cipher-tab-btn.active {
-            background-color: var(--accent-purple);
-            color: white;
             border-color: var(--accent-purple);
         }
 
@@ -307,9 +314,6 @@
                 order: 2;
                 padding: 20px;
             }
-            .cipher-type-tabs {
-                flex-wrap: wrap;
-            }
         }
     </style>
 </head>
@@ -359,14 +363,7 @@
             <!-- ================= قسم التشفير Encrypt ================= -->
             <div id="encryptMode" class="sub-content active">
                 <div class="card">
-                    <h2>أدوات تشفير النصوص المتقدمة</h2>
-                    
-                    <!-- تابات خوارزميات التشفير -->
-                    <div class="cipher-type-tabs">
-                        <button class="cipher-tab-btn active" onclick="selectCipherType('Enc', 'caesar', this)">Caesar Cipher</button>
-                        <button class="cipher-tab-btn" onclick="selectCipherType('Enc', 'vigenere', this)">Vigenère Cipher</button>
-                        <button class="cipher-tab-btn" onclick="selectCipherType('Enc', 'rsa', this)">RSA Cipher</button>
-                    </div>
+                    <h2 id="encTitle">أدوات التشفير - Caesar Cipher</h2>
 
                     <!-- خيار القيصر -->
                     <div id="panelCaesarEnc" class="cipher-panel active">
@@ -407,14 +404,7 @@
             <!-- ================= قسم فك التشفير Decrypt ================= -->
             <div id="decryptMode" class="sub-content">
                 <div class="card">
-                    <h2>أدوات فك تشفير النصوص</h2>
-
-                    <!-- تابات خوارزميات فك التشفير -->
-                    <div class="cipher-type-tabs">
-                        <button class="cipher-tab-btn active" onclick="selectCipherType('Dec', 'caesar', this)">Caesar Cipher</button>
-                        <button class="cipher-tab-btn" onclick="selectCipherType('Dec', 'vigenere', this)">Vigenère Cipher</button>
-                        <button class="cipher-tab-btn" onclick="selectCipherType('Dec', 'rsa', this)">RSA Cipher</button>
-                    </div>
+                    <h2 id="decTitle">أدوات فك التشفير - Caesar Cipher</h2>
 
                     <!-- خيار القيصر -->
                     <div id="panelCaesarDec" class="cipher-panel active">
@@ -500,7 +490,17 @@
     <div class="sidebar">
         <div class="nav-menu">
             <button id="btnPasswordPage" class="nav-btn active" onclick="switchPage('passwordPage')">تقييم كلمات السر</button>
+            
+            <!-- زر التشفير الرئيسي -->
             <button id="btnCipherPage" class="nav-btn" onclick="switchPage('cipherPage')">تشفير أو فك التشفير</button>
+            
+            <!-- القائمة الفرعية لأنواع التشفير تحت زر التشفير في اليسار -->
+            <div id="sidebarCipherMenu" class="sidebar-sub-menu">
+                <button class="sidebar-sub-btn active" onclick="selectCipherType('caesar', this)">• Caesar Cipher (قيصر)</button>
+                <button class="sidebar-sub-btn" onclick="selectCipherType('vigenere', this)">• Vigenère Cipher (فيجينير)</button>
+                <button class="sidebar-sub-btn" onclick="selectCipherType('rsa', this)">• RSA Cipher (مفتاح عام)</button>
+            </div>
+
             <button id="btnStegoPage" class="nav-btn" onclick="switchPage('stegoPage')">إخفاء البيانات في الصور (Steganography)</button>
         </div>
 
@@ -513,9 +513,7 @@
 </div>
 
 <script>
-    // تتبع الخوارزمية المختارة حالياً للتشفير وفك التشفير
-    let selectedCipherEnc = 'caesar';
-    let selectedCipherDec = 'caesar';
+    let selectedCipher = 'caesar';
 
     window.addEventListener('DOMContentLoaded', (event) => {
         const currentUrl = window.location.href;
@@ -532,10 +530,23 @@
     function switchPage(pageId) {
         document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        
+        const subMenu = document.getElementById('sidebarCipherMenu');
+
         document.getElementById(pageId).classList.add('active');
-        if(pageId === 'passwordPage') document.getElementById('btnPasswordPage').classList.add('active');
-        else if(pageId === 'cipherPage') document.getElementById('btnCipherPage').classList.add('active');
-        else if(pageId === 'stegoPage') document.getElementById('btnStegoPage').classList.add('active');
+        
+        if(pageId === 'passwordPage') {
+            document.getElementById('btnPasswordPage').classList.add('active');
+            subMenu.classList.remove('open');
+        }
+        else if(pageId === 'cipherPage') {
+            document.getElementById('btnCipherPage').classList.add('active');
+            subMenu.classList.add('open'); // إظهار التابات الفرعية في اليسار
+        }
+        else if(pageId === 'stegoPage') {
+            document.getElementById('btnStegoPage').classList.add('active');
+            subMenu.classList.remove('open');
+        }
     }
 
     function switchSubMode(modeId) {
@@ -554,26 +565,34 @@
         else document.getElementById('subBtnStegoDecrypt').classList.add('active');
     }
 
-    // التبديل بين تابات التشفير (Caesar, Vigenere, RSA)
-    function selectCipherType(suffix, cipherType, btnElement) {
-        if (suffix === 'Enc') selectedCipherEnc = cipherType;
-        else selectedCipherDec = cipherType;
+    // التبديل بين خوارزميات التشفير من القائمة الجانبية اليسرى
+    function selectCipherType(cipherType, btnElement) {
+        selectedCipher = cipherType;
 
-        // تحديث زر التاب النشط
+        // تحديث حالة الزر الفرعي النشط في الشريط الجانبي
         const parent = btnElement.parentElement;
-        parent.querySelectorAll('.cipher-tab-btn').forEach(btn => btn.classList.remove('active'));
+        parent.querySelectorAll('.sidebar-sub-btn').forEach(btn => btn.classList.remove('active'));
         btnElement.classList.add('active');
 
-        // إخفاء/إظهار لوحات الخيارات الخاصة بكل نوع
-        const targetContainer = document.getElementById(suffix === 'Enc' ? 'encryptMode' : 'decryptMode');
-        targetContainer.querySelectorAll('.cipher-panel').forEach(panel => panel.classList.remove('active'));
+        // إخفاء كل اللوحات أولاً
+        document.querySelectorAll('.cipher-panel').forEach(panel => panel.classList.remove('active'));
 
+        // إظهار اللوحة المطلوبة في قسمي التشفير وفك التشفير
         if (cipherType === 'caesar') {
-            document.getElementById('panelCaesar' + suffix).classList.add('active');
+            document.getElementById('panelCaesarEnc').classList.add('active');
+            document.getElementById('panelCaesarDec').classList.add('active');
+            document.getElementById('encTitle').innerText = "أدوات التشفير - Caesar Cipher";
+            document.getElementById('decTitle').innerText = "أدوات فك التشفير - Caesar Cipher";
         } else if (cipherType === 'vigenere') {
-            document.getElementById('panelVigenere' + suffix).classList.add('active');
+            document.getElementById('panelVigenereEnc').classList.add('active');
+            document.getElementById('panelVigenereDec').classList.add('active');
+            document.getElementById('encTitle').innerText = "أدوات التشفير - Vigenère Cipher";
+            document.getElementById('decTitle').innerText = "أدوات فك التشفير - Vigenère Cipher";
         } else if (cipherType === 'rsa') {
-            document.getElementById('panelRsa' + suffix).classList.add('active');
+            document.getElementById('panelRsaEnc').classList.add('active');
+            document.getElementById('panelRsaDec').classList.add('active');
+            document.getElementById('encTitle').innerText = "أدوات التشفير - RSA Cipher";
+            document.getElementById('decTitle').innerText = "أدوات فك التشفير - RSA Cipher";
         }
     }
 
@@ -680,7 +699,7 @@
 
     function processCipher(isEncrypt) {
         const suffix = isEncrypt ? 'Enc' : 'Dec';
-        const type = isEncrypt ? selectedCipherEnc : selectedCipherDec;
+        const type = selectedCipher;
         const input = document.getElementById('cipherInput' + suffix).value;
         let output = "";
 
