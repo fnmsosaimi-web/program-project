@@ -339,6 +339,34 @@
             transition: all 0.3s;
         }
 
+        /* تنسيق خاص لزر وحقل كلمة السر الإظهار والإخفاء */
+        .password-field-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-field-wrapper input {
+            padding-left: 45px; /* ترك مسافة لزر الإظهار من جهة اليسار */
+        }
+
+        .toggle-password-btn {
+            position: absolute;
+            left: 10px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 4px 8px;
+            border-radius: 6px;
+            color: var(--text-muted);
+            transition: background 0.2s;
+        }
+
+        .toggle-password-btn:hover {
+            background: #e4e6eb;
+        }
+
         input:focus, textarea:focus, select:focus {
             outline: none;
             background-color: #ffffff;
@@ -616,7 +644,12 @@
                 <h2>مختبر اختراق وتقييم أمان كلمة السر</h2>
                 <div class="form-group">
                     <label>أدخل كلمة السر للاختبار والتحليل الفوري:</label>
-                    <input type="password" id="passwordInput" oninput="evaluatePassword()" placeholder="اكتب كلمة السر هنا...">
+                    
+                    <!-- حقل كلمة السر المضاف إليه زر الإظهار والإخفاء -->
+                    <div class="password-field-wrapper">
+                        <input type="password" id="passwordInput" oninput="evaluatePassword()" placeholder="اكتب كلمة السر هنا...">
+                        <button type="button" class="toggle-password-btn" id="togglePasswordBtn" onclick="togglePasswordVisibility()" title="إظهار/إخفاء كلمة السر">👁️</button>
+                    </div>
                 </div>
 
                 <div class="time-box">
@@ -836,6 +869,20 @@
         processCipher(true);
     });
 
+    // دالة إظهار وإخفاء كلمة السر المضافة
+    function togglePasswordVisibility() {
+        const pwdInput = document.getElementById('passwordInput');
+        const toggleBtn = document.getElementById('togglePasswordBtn');
+        
+        if (pwdInput.type === 'password') {
+            pwdInput.type = 'text';
+            toggleBtn.textContent = '🙈';
+        } else {
+            pwdInput.type = 'password';
+            toggleBtn.textContent = '👁️';
+        }
+    }
+
     function switchPage(pageId) {
         document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
@@ -865,305 +912,280 @@
         document.querySelectorAll('#stegoPage .sub-content').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('#stegoPage .sub-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(modeId).classList.add('active');
-        if(modeId === 'stegoEncryptMode') document.getElementById('subBtnStegoEncrypt').classList.add('active');
-        else document.getElementById('subBtnStegoDecrypt').classList.add('active');
+        if(modeId === 'stegoEncryptMode') {
+            document.getElementById('subBtnStegoEncrypt').classList.add('active');
+        } else {
+            document.getElementById('subBtnStegoDecrypt').classList.add('active');
+        }
     }
 
-    function selectCipherType(cipherType, btnElement) {
-        selectedCipher = cipherType;
-        document.querySelectorAll('.cipher-select-btn').forEach(btn => btn.classList.remove('active'));
-        btnElement.classList.add('active');
+    function selectCipherType(type, btnElem) {
+        selectedCipher = type;
+        document.querySelectorAll('.cipher-select-btn').forEach(b => b.classList.remove('active'));
+        btnElem.classList.add('active');
 
-        document.querySelectorAll('.cipher-panel').forEach(panel => panel.classList.remove('active'));
+        // إخفاء كافة الواجهات الخاصة بالخوارزميات
+        document.querySelectorAll('.cipher-panel').forEach(p => p.classList.remove('active'));
 
-        if (cipherType === 'caesar') {
+        // إظهار اللوحة المطلوبة
+        if(type === 'caesar') {
             document.getElementById('panelCaesarEnc').classList.add('active');
             document.getElementById('panelCaesarDec').classList.add('active');
-        } else if (cipherType === 'vigenere') {
+        } else if(type === 'vigenere') {
             document.getElementById('panelVigenereEnc').classList.add('active');
             document.getElementById('panelVigenereDec').classList.add('active');
-        } else if (cipherType === 'rsa') {
+        } else if(type === 'rsa') {
             document.getElementById('panelRsaEnc').classList.add('active');
             document.getElementById('panelRsaDec').classList.add('active');
         }
-        processCipher(true);
+
+        const isEncrypting = document.getElementById('encryptMode').classList.contains('active');
+        processCipher(isEncrypting);
     }
 
-    function renderCaesarWheelSVG(svgId) {
-        const svg = document.getElementById(svgId);
-        if (!svg) return;
-        const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        const total = alphabet.length;
-        const center = 150;
-        const rOuter = 125;
-        const rInner = 88;
-
-        let html = `<circle cx="${center}" cy="${center}" r="140" class="wheel-outer-circle" />`;
-
-        for (let i = 0; i < total; i++) {
-            let angle = (i * 360 / total) - 90;
-            let rad = angle * Math.PI / 180;
-            let x = center + rOuter * Math.cos(rad);
-            let y = center + rOuter * Math.sin(rad);
-            html += `<text x="${x}" y="${y}" class="wheel-text-outer">${alphabet[i]}</text>`;
-        }
-
-        html += `
-            <g id="${svgId}_innerGroup" class="wheel-inner-group">
-                <circle cx="${center}" cy="${center}" r="105" style="fill: #eef2ff; stroke: #5345ed; stroke-width: 2;" />
-                <circle cx="${center}" cy="${center}" r="70" style="fill: #ffffff; stroke: #cbd5e1; stroke-width: 1;" />
-        `;
-
-        for (let i = 0; i < total; i++) {
-            let angle = (i * 360 / total) - 90;
-            let rad = angle * Math.PI / 180;
-            let x = center + rInner * Math.cos(rad);
-            let y = center + rInner * Math.sin(rad);
-            html += `<text x="${x}" y="${y}" class="wheel-text-inner">${alphabet[i]}</text>`;
-        }
-
-        html += `</g>`;
-        svg.innerHTML = html;
-    }
-
-    function updateWheelRotation(shiftKey, isEncrypt, svgId) {
-        const innerGroup = document.getElementById(svgId + '_innerGroup');
-        if (!innerGroup) return;
-        
-        let k = parseInt(shiftKey) || 0;
-        let degreesPerLetter = 360 / 26;
-        let rotAngle = isEncrypt ? -(k * degreesPerLetter) : (k * degreesPerLetter);
-        
-        innerGroup.style.transform = `rotate(${rotAngle}deg)`;
-    }
-
+    /* --- وظائف تقييم كلمات المرور --- */
     function evaluatePassword() {
         const pwd = document.getElementById('passwordInput').value;
+        const timeResult = document.getElementById('crackTimeResult');
+        const bar = document.getElementById('strengthBar');
         const feedback = document.getElementById('passwordFeedback');
         const scoreBadge = document.getElementById('scoreBadge');
-        const bar = document.getElementById('strengthBar');
-        const timeResult = document.getElementById('crackTimeResult');
         const analysisSection = document.getElementById('analysisSection');
         const strengthsList = document.getElementById('strengthsList');
         const weaknessesList = document.getElementById('weaknessesList');
 
         if (!pwd) {
+            timeResult.innerText = "بانتظار المدخلات...";
+            bar.style.width = "0%";
             feedback.innerText = "أدخل كلمة سر للتحليل...";
             scoreBadge.innerText = "0/100";
-            bar.style.width = "0%";
-            timeResult.innerText = "بانتظار المدخلات...";
-            analysisSection.style.display = "none";
+            analysisSection.style.display = 'none';
             return;
         }
 
-        let charsetSize = 0;
-        let hasLower = /[a-z]/.test(pwd);
-        let hasUpper = /[A-Z]/.test(pwd);
-        let hasNum = /[0-9]/.test(pwd);
-        let hasSym = /[^a-zA-Z0-9]/.test(pwd);
+        analysisSection.style.display = 'grid';
+        strengthsList.innerHTML = '';
+        weaknessesList.innerHTML = '';
 
-        let strengths = [];
-        let weaknesses = [];
+        let score = 0;
+        let poolSize = 0;
 
-        if (hasLower) { charsetSize += 26; strengths.push("أحرُف صغيرة (a-z)"); }
-        else { weaknesses.push("أضف أحرُفاً صغيرة"); }
+        if (/[a-z]/.test(pwd)) { score += 15; poolSize += 26; strengthsList.innerHTML += '<li>• تحوي أحرف صغيرة (a-z)</li>'; }
+        else { weaknessesList.innerHTML += '<li>• أضف أحرفاً صغيرة لتعقيد التخمين</li>'; }
 
-        if (hasUpper) { charsetSize += 26; strengths.push("أحرُف كبيرة (A-Z)"); }
-        else { weaknesses.push("أضف أحرُفاً كبيرة"); }
+        if (/[A-Z]/.test(pwd)) { score += 20; poolSize += 26; strengthsList.innerHTML += '<li>• تحوي أحرف كبيرة (A-Z)</li>'; }
+        else { weaknessesList.innerHTML += '<li>• أضف أحرفاً كبيرة (Capital Letters)</li>'; }
 
-        if (hasNum) { charsetSize += 10; strengths.push("أرقام (0-9)"); }
-        else { weaknesses.push("أضف أرقاماً متتالية أو متفرقة"); }
+        if (/[0-9]/.test(pwd)) { score += 15; poolSize += 10; strengthsList.innerHTML += '<li>• تحوي أرقاماً عدادية (0-9)</li>'; }
+        else { weaknessesList.innerHTML += '<li>• أدخل أرقاماً جيدة لتشتيت المخترق</li>'; }
 
-        if (hasSym) { charsetSize += 32; strengths.push("رموز خاصة (!@#$)"); }
-        else { weaknesses.push("أضف رموزاً مثل @,#,$"); }
+        if (/[^a-zA-Z0-9]/.test(pwd)) { score += 25; poolSize += 32; strengthsList.innerHTML += '<li>• تحوي رموزاً خاصة (@, #, $, ...)</li>'; }
+        else { weaknessesList.innerHTML += '<li>• أضف رموزاً خاصة لرفع القوة بشكل مضاعف</li>'; }
 
-        if (pwd.length >= 12) strengths.push(`طول ممتاز (${pwd.length} حرف)`);
-        else weaknesses.push(`طول قصير (${pwd.length} أحرُف)، يفضل 12+`);
+        if (pwd.length >= 8) { score += 25; strengthsList.innerHTML += `<li>• الطول مناسب (${pwd.length} حرفاً)</li>`; }
+        else { weaknessesList.innerHTML += `<li>• كلمة السر قصيرة جداً (${pwd.length} حروف فقط)</li>`; }
 
-        const combinations = Math.pow(charsetSize, pwd.length);
-        const guessesPerSecond = 1e10; 
-        const secondsToCrack = combinations / guessesPerSecond;
+        bar.style.width = Math.min(score, 100) + '%';
+        scoreBadge.innerText = Math.min(score, 100) + '/100';
 
-        timeResult.innerText = formatTime(secondsToCrack);
-
-        let score = Math.min(100, Math.floor((Math.log2(combinations || 1) / 80) * 100));
-        scoreBadge.innerText = `${score}/100`;
-        bar.style.width = `${score}%`;
-
-        if (score < 30) {
-            bar.style.backgroundColor = "var(--accent-red)";
-            feedback.innerText = "ضعيفة جداً";
-        } else if (score < 65) {
-            bar.style.backgroundColor = "#f59e0b";
-            feedback.innerText = "متوسطة القوة";
+        if (score < 40) {
+            bar.style.backgroundColor = 'var(--accent-red)';
+            feedback.innerText = 'ضعيفة جداً - سهلة الاختراق ❌';
+            feedback.style.color = 'var(--accent-red)';
+        } else if (score < 75) {
+            bar.style.backgroundColor = '#f59e0b';
+            feedback.innerText = 'متوسطة الأمان ⚠️';
+            feedback.style.color = '#f59e0b';
         } else {
-            bar.style.backgroundColor = "var(--accent-green)";
-            feedback.innerText = "قوية وممتازة";
+            bar.style.backgroundColor = 'var(--accent-green)';
+            feedback.innerText = 'قوية وممتازة 🔒';
+            feedback.style.color = 'var(--accent-green)';
         }
 
-        strengthsList.innerHTML = strengths.map(s => `<li>✔ ${s}</li>`).join('');
-        weaknessesList.innerHTML = weaknesses.map(w => `<li>✖ ${w}</li>`).join('');
-        analysisSection.style.display = "grid";
+        // حساب وقت الكسر
+        if (poolSize === 0) return;
+        const combinations = Math.pow(poolSize, pwd.length);
+        const guessesPerSec = 1e10; // 10 مليار محاولة بالثانية
+        const seconds = combinations / guessesPerSec;
+
+        if (seconds < 1) timeResult.innerText = "أقل من ثانية واحدة (لحظياً!)";
+        else if (seconds < 60) timeResult.innerText = Math.round(seconds) + " ثوانٍ";
+        else if (seconds < 3600) timeResult.innerText = Math.round(seconds / 60) + " دقائق";
+        else if (seconds < 86400) timeResult.innerText = Math.round(seconds / 3600) + " ساعات";
+        else if (seconds < 31536000) timeResult.innerText = Math.round(seconds / 86400) + " أيام";
+        else if (seconds < 31536000000) timeResult.innerText = Math.round(seconds / 31536000) + " سنوات";
+        else timeResult.innerText = "ملايين القرون! 🔒";
     }
 
-    function formatTime(seconds) {
-        if (seconds < 1) return "أقل من ثانية (اختراق فوري!)";
-        if (seconds < 60) return `${Math.round(seconds)} ثانية`;
-        if (seconds < 3600) return `${Math.round(seconds / 60)} دقيقة`;
-        if (seconds < 86400) return `${Math.round(seconds / 3600)} ساعة`;
-        if (seconds < 31536000) return `${Math.round(seconds / 86400)} يوم`;
-        const years = seconds / 31536000;
-        if (years < 1000) return `${Math.round(years)} سنة`;
-        if (years < 1e6) return `${(years / 1000).toFixed(1)} ألف سنة`;
-        return "1Million+ سنة";
-    }
+    /* --- رسم عجلة قيصر SVG التفاعلية --- */
+    function renderCaesarWheelSVG(svgId) {
+        const svg = document.getElementById(svgId);
+        if(!svg) return;
+        svg.innerHTML = '';
 
-    function caesarCipherEdu(text, shift, isEncrypt) {
-        shift = (shift % 26 + 26) % 26;
-        if (!isEncrypt) shift = (26 - shift) % 26;
-        let result = "", steps = [];
+        const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        const center = 150;
+        const outerR = 135;
+        const innerR = 95;
 
-        for (let i = 0; i < text.length; i++) {
-            let char = text[i];
-            if (char.match(/[a-z]/i)) {
-                let code = text.charCodeAt(i);
-                let base = (code >= 65 && code <= 90) ? 65 : 97;
-                let origPos = code - base;
-                let newPos = (origPos + shift) % 26;
-                let newChar = String.fromCharCode(base + newPos);
-                result += newChar;
-                steps.push({ char: char, explanation: `'${char}' (ترتيبه ${origPos}) ➔ بالإزاحة (+${shift}) ➔ يصبح '${newChar}' (${newPos})` });
-            } else {
-                result += char;
-                steps.push({ char: char, explanation: `'${char}' يبقى كما هو.` });
-            }
+        // الحلقة الخارجية
+        let html = `<circle cx="${center}" cy="${center}" r="${outerR}" class="wheel-outer-circle" />`;
+        html += `<circle cx="${center}" cy="${center}" r="${innerR}" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2" />`;
+
+        // الحروف الخارجية
+        for(let i = 0; i < 26; i++) {
+            const angle = (i * 360 / 26) - 90;
+            const rad = angle * Math.PI / 180;
+            const x = center + (outerR - 18) * Math.cos(rad);
+            const y = center + (outerR - 18) * Math.sin(rad);
+            html += `<text x="${x}" y="${y}" class="wheel-text-outer">${alphabet[i]}</text>`;
         }
-        return { result, steps };
-    }
 
-    function vigenereCipherEdu(text, key, isEncrypt) {
-        if (!key) key = "KEY";
-        key = key.toUpperCase().replace(/[^A-Z]/g, '');
-        if (key.length === 0) key = "KEY";
+        // القرص الداخلي الدوار
+        html += `<g id="${svgId}_innerGroup" class="wheel-inner-group">`;
+        html += `<circle cx="${center}" cy="${center}" r="${innerR - 5}" fill="#ffffff" stroke="#5345ed" stroke-width="2" />`;
 
-        let result = "", steps = [], keyIndex = 0;
-
-        for (let i = 0; i < text.length; i++) {
-            let char = text[i];
-            if (char.match(/[a-z]/i)) {
-                let isUpper = (char === char.toUpperCase());
-                let pCode = char.toUpperCase().charCodeAt(0) - 65;
-                let kCode = key[keyIndex % key.length].charCodeAt(0) - 65;
-                let shift = isEncrypt ? kCode : (26 - kCode) % 26;
-                let cCode = (pCode + shift) % 26;
-                let newChar = String.fromCharCode(cCode + 65);
-                if (!isUpper) newChar = newChar.toLowerCase();
-
-                result += newChar;
-                steps.push({ char: char, explanation: `'${char}' مع مفتاح '${key[keyIndex % key.length]}' ➔ يصبح '${newChar}'` });
-                keyIndex++;
-            } else {
-                result += char;
-                steps.push({ char: char, explanation: `'${char}' لا يتغير.` });
-            }
+        for(let i = 0; i < 26; i++) {
+            const angle = (i * 360 / 26) - 90;
+            const rad = angle * Math.PI / 180;
+            const x = center + (innerR - 22) * Math.cos(rad);
+            const y = center + (innerR - 22) * Math.sin(rad);
+            html += `<text x="${x}" y="${y}" class="wheel-text-inner">${alphabet[i]}</text>`;
         }
-        return { result, steps };
+        html += `</g>`;
+
+        svg.innerHTML = html;
     }
 
-    function rsaCipherEdu(text, p, q, e, isEncrypt) {
-        let n = BigInt(p * q), phi = BigInt((p - 1) * (q - 1)), eBig = BigInt(e);
-        let d = modInverse(eBig, phi);
-        let result = "", steps = [];
+    function rotateCaesarWheel(shift, isEnc) {
+        const encGroup = document.getElementById('caesarWheelEncSVG_innerGroup');
+        const decGroup = document.getElementById('caesarWheelDecSVG_innerGroup');
 
-        if (isEncrypt) {
-            steps.push({ char: 'RSA', explanation: `N = ${n} ، Phi = ${phi} ، المفتاح العلني E = ${e}` });
-            let encryptedArray = [];
-            for (let i = 0; i < text.length; i++) {
-                let m = BigInt(text.charCodeAt(i));
-                let c = modPow(m, eBig, n);
-                encryptedArray.push(c.toString());
-                steps.push({ char: text[i], explanation: `'${text[i]}' (${m}) ➔ (${m}^${e}) mod ${n} ➔ ${c}` });
-            }
-            result = encryptedArray.join(' ');
-        } else {
-            steps.push({ char: 'RSA', explanation: `حساب المفتاح الخاص D = ${d}` });
-            let cipherTokens = text.trim().split(/\s+/);
-            for (let i = 0; i < cipherTokens.length; i++) {
-                if (!cipherTokens[i]) continue;
-                let c = BigInt(cipherTokens[i]);
-                let m = modPow(c, d, n);
-                let origChar = String.fromCharCode(Number(m));
-                result += origChar;
-                steps.push({ char: cipherTokens[i], explanation: `القيمة المشفرة ${c} ➔ (${c}^${d}) mod ${n} ➔ '${origChar}'` });
-            }
-        }
-        return { result, steps };
+        const degrees = (shift % 26) * (360 / 26);
+        const rotationAngle = isEnc ? -degrees : degrees;
+
+        if(encGroup) encGroup.style.transform = `rotate(${rotationAngle}deg)`;
+        if(decGroup) decGroup.style.transform = `rotate(${rotationAngle}deg)`;
     }
 
-    function modPow(base, exp, modulus) {
-        if (modulus === 1n) return 0n;
-        let result = 1n;
-        base = base % modulus;
-        while (exp > 0n) {
-            if (exp % 2n === 1n) result = (result * base) % modulus;
-            exp = exp / 2n;
-            base = (base * base) % modulus;
-        }
-        return result;
-    }
-
-    function modInverse(e, phi) {
-        let m0 = phi, t, q, x0 = 0n, x1 = 1n;
-        if (phi === 1n) return 0n;
-        while (e > 1n) {
-            q = e / phi;
-            t = phi; phi = e % phi; e = t;
-            t = x0; x0 = x1 - q * x0; x1 = t;
-        }
-        if (x1 < 0n) x1 += m0;
-        return x1;
-    }
-
+    /* --- منطق التشفير وفك التشفير --- */
     function processCipher(isEncrypt) {
         const suffix = isEncrypt ? 'Enc' : 'Dec';
-        const type = selectedCipher;
-        const input = document.getElementById('cipherInput' + suffix).value;
-        let output = "";
-
+        const inputStr = document.getElementById('cipherInput' + suffix).value;
+        const outputElem = document.getElementById('cipherOutput' + suffix);
+        const stepsElem = document.getElementById('stepsList' + suffix);
         const eduSection = document.getElementById('eduSection' + suffix);
-        const stepsList = document.getElementById('stepsList' + suffix);
 
-        if (type === 'caesar') {
-            let k = parseInt(document.getElementById('caesarKey' + suffix).value) || 0;
-            updateWheelRotation(k, isEncrypt, 'caesarWheel' + suffix + 'SVG');
-            const res = caesarCipherEdu(input, k, isEncrypt);
-            output = res.result;
+        if(!inputStr) {
+            outputElem.innerText = '--';
+            eduSection.style.display = 'none';
+            return;
+        }
 
-            eduSection.style.display = "block";
-            stepsList.innerHTML = res.steps.map(st => `<div class="step-item"><span class="step-badge">${st.char}</span><span>${st.explanation}</span></div>`).join('');
-        } else if (type === 'vigenere') {
-            const key = document.getElementById('vigenereKey' + suffix).value;
-            const res = vigenereCipherEdu(input, key, isEncrypt);
-            output = res.result;
+        let resultText = '';
+        let stepsHTML = '';
 
-            eduSection.style.display = "block";
-            stepsList.innerHTML = res.steps.map(st => `<div class="step-item"><span class="step-badge">${st.char}</span><span>${st.explanation}</span></div>`).join('');
-        } else if (type === 'rsa') {
+        if(selectedCipher === 'caesar') {
+            const key = parseInt(document.getElementById('caesarKey' + suffix).value) || 0;
+            rotateCaesarWheel(key, isEncrypt);
+
+            for(let i = 0; i < inputStr.length; i++) {
+                let char = inputStr[i];
+                if(char.match(/[a-z]/i)) {
+                    let code = inputStr.charCodeAt(i);
+                    let base = (code >= 65 && code <= 90) ? 65 : 97;
+                    let shift = isEncrypt ? key : -key;
+                    let newCode = (code - base + shift) % 26;
+                    if(newCode < 0) newCode += 26;
+                    let newChar = String.fromCharCode(newCode + base);
+                    resultText += newChar;
+                    stepsHTML += `<div class="step-item"><span class="step-badge">${i+1}</span> الحرف '${char}' ➔ الإزاحة (${isEncrypt?'+':'-'}${key}) ➔ الناتج '${newChar}'</div>`;
+                } else {
+                    resultText += char;
+                }
+            }
+        } else if(selectedCipher === 'vigenere') {
+            const keyStr = document.getElementById('vigenereKey' + suffix).value || 'KEY';
+            let keyIndex = 0;
+
+            for(let i = 0; i < inputStr.length; i++) {
+                let char = inputStr[i];
+                if(char.match(/[a-z]/i)) {
+                    let isUpper = (char === char.toUpperCase());
+                    let pCode = char.toUpperCase().charCodeAt(0) - 65;
+                    let kCode = keyStr[keyIndex % keyStr.length].toUpperCase().charCodeAt(0) - 65;
+                    let resCode = isEncrypt ? (pCode + kCode) % 26 : (pCode - kCode + 26) % 26;
+                    let newChar = String.fromCharCode(resCode + 65);
+                    if(!isUpper) newChar = newChar.toLowerCase();
+
+                    resultText += newChar;
+                    stepsHTML += `<div class="step-item"><span class="step-badge">${i+1}</span> الحرف '${char}' مع المفتاح '${keyStr[keyIndex % keyStr.length]}' ➔ الناتج '${newChar}'</div>`;
+                    keyIndex++;
+                } else {
+                    resultText += char;
+                }
+            }
+        } else if(selectedCipher === 'rsa') {
             const p = parseInt(document.getElementById('rsaP' + suffix).value) || 61;
             const q = parseInt(document.getElementById('rsaQ' + suffix).value) || 53;
             const e = parseInt(document.getElementById('rsaE' + suffix).value) || 17;
-            const res = rsaCipherEdu(input, p, q, e, isEncrypt);
-            output = res.result;
+            
+            const n = p * q;
+            const phi = (p - 1) * (q - 1);
+            let d = modInverse(e, phi);
 
-            eduSection.style.display = "block";
-            stepsList.innerHTML = res.steps.map(st => `<div class="step-item"><span class="step-badge">${st.char || 'RSA'}</span><span>${st.explanation}</span></div>`).join('');
+            stepsHTML += `<div class="step-item"><span class="step-badge">N</span> حساب المتغير N = P × Q = ${n}</div>`;
+            stepsHTML += `<div class="step-item"><span class="step-badge">Φ</span> حساب معامل أويلر Φ(N) = ${phi}</div>`;
+
+            if(isEncrypt) {
+                let cipherNums = [];
+                for(let i = 0; i < inputStr.length; i++) {
+                    let m = inputStr.charCodeAt(i);
+                    let c = bigIntPowMod(BigInt(m), BigInt(e), BigInt(n));
+                    cipherNums.push(c.toString());
+                }
+                resultText = cipherNums.join(' ');
+            } else {
+                let arr = inputStr.trim().split(' ');
+                for(let i = 0; i < arr.length; i++) {
+                    let c = parseInt(arr[i]);
+                    if(!isNaN(c)) {
+                        let m = bigIntPowMod(BigInt(c), BigInt(d), BigInt(n));
+                        resultText += String.fromCharCode(Number(m));
+                    }
+                }
+            }
         }
 
-        document.getElementById('cipherOutput' + suffix).innerText = output || "--";
+        outputElem.innerText = resultText;
+        if(stepsHTML) {
+            eduSection.style.display = 'block';
+            stepsElem.innerHTML = stepsHTML;
+        } else {
+            eduSection.style.display = 'none';
+        }
     }
 
-    let imgEncObj = null, imgDecObj = null;
+    function modInverse(a, m) {
+        a = (a % m + m) % m;
+        for (let x = 1; x < m; x++) {
+            if ((a * x) % m == 1) return x;
+        }
+        return 1;
+    }
 
+    function bigIntPowMod(base, exp, mod) {
+        let res = BigInt(1);
+        base = base % mod;
+        while (exp > 0) {
+            if (exp % BigInt(2) === BigInt(1)) res = (res * base) % mod;
+            base = (base * base) % mod;
+            exp = exp / BigInt(2);
+        }
+        return res;
+    }
+
+    /* --- منطق إخفاء واستخراج الرسائل بالصور (Steganography) --- */
     function handleImage(e, canvasId) {
         const reader = new FileReader();
         reader.onload = function(event) {
@@ -1174,36 +1196,35 @@
                 canvas.width = img.width;
                 canvas.height = img.height;
                 ctx.drawImage(img, 0, 0);
-                if (canvasId === 'stegoCanvasEnc') imgEncObj = img;
-                else imgDecObj = img;
             }
             img.src = event.target.result;
         }
-        if (e.target.files[0]) reader.readAsDataURL(e.target.files[0]);
+        if(e.target.files[0]) reader.readAsDataURL(e.target.files[0]);
     }
 
     function hideMessage() {
         const canvas = document.getElementById('stegoCanvasEnc');
         const ctx = canvas.getContext('2d');
-        const message = document.getElementById('stegoMessageEnc').value;
+        const msg = document.getElementById('stegoMessageEnc').value;
 
-        if (!imgEncObj || !message) {
-            alert('يرجى اختيار صورة وكتابة رسالة أولاً!');
+        if(!canvas.width || !msg) {
+            alert('يرجى اختيار صورة واكتب رسالة للإخفاء!');
             return;
         }
 
         const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const data = imgData.data;
 
-        let fullMessage = message + "||END||";
-        let binaryMsg = "";
-        for (let i = 0; i < fullMessage.length; i++) {
-            let bin = fullMessage.charCodeAt(i).toString(2);
-            binaryMsg += "0".repeat(8 - bin.length) + bin;
+        // تحويل النص إلى باينري
+        let binaryMsg = '';
+        for (let i = 0; i < msg.length; i++) {
+            let bin = msg.charCodeAt(i).toString(2);
+            binaryMsg += '0'.repeat(8 - bin.length) + bin;
         }
+        binaryMsg += '00000000'; // نهاية النص Null Terminator
 
         if (binaryMsg.length > data.length / 4) {
-            alert('حجم الرسالة كبير بالنسبة لهذه الصورة!');
+            alert('حجم الرسالة كبير جداً بالنسبة لهذه الصورة!');
             return;
         }
 
@@ -1213,8 +1234,9 @@
 
         ctx.putImageData(imgData, 0, 0);
 
+        // تنزيل الصورة الناتجة
         const link = document.createElement('a');
-        link.download = 'stego_image.png';
+        link.download = 'stego-image.png';
         link.href = canvas.toDataURL('image/png');
         link.click();
     }
@@ -1222,30 +1244,30 @@
     function revealMessage() {
         const canvas = document.getElementById('stegoCanvasDec');
         const ctx = canvas.getContext('2d');
+        const output = document.getElementById('stegoOutputDec');
 
-        if (!imgDecObj) {
-            alert('يرجى اختيار صورة أولاً!');
+        if(!canvas.width) {
+            alert('يرجى رفع الصورة المحملة بالرسالة أولاً!');
             return;
         }
 
         const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const data = imgData.data;
 
-        let binaryMsg = "", extractedText = "";
-
+        let binaryMsg = '';
         for (let i = 0; i < data.length; i += 4) {
             binaryMsg += (data[i] & 1).toString();
-            if (binaryMsg.length === 8) {
-                let charCode = parseInt(binaryMsg, 2);
-                extractedText += String.fromCharCode(charCode);
-                binaryMsg = "";
-                if (extractedText.endsWith("||END||")) {
-                    extractedText = extractedText.replace("||END||", "");
-                    break;
-                }
-            }
         }
-        document.getElementById('stegoOutputDec').innerText = extractedText || "لم يتم العثور على رسالة مخفية.";
+
+        let hiddenText = '';
+        for (let i = 0; i < binaryMsg.length; i += 8) {
+            let byte = binaryMsg.substr(i, 8);
+            if (byte === '00000000') break;
+            hiddenText += String.fromCharCode(parseInt(byte, 2));
+        }
+
+        output.innerText = hiddenText ? hiddenText : "لم يتم العثور على رسالة مخفية!";
+        output.style.color = hiddenText ? "var(--accent-green)" : "var(--accent-red)";
     }
 </script>
 
