@@ -339,7 +339,6 @@
             transition: all 0.3s;
         }
 
-        /* تنسيق خاص لزر وحقل كلمة السر الإظهار والإخفاء */
         .password-field-wrapper {
             position: relative;
             display: flex;
@@ -347,7 +346,7 @@
         }
 
         .password-field-wrapper input {
-            padding-left: 45px; /* ترك مسافة لزر الإظهار من جهة اليسار */
+            padding-left: 45px;
         }
 
         .toggle-password-btn {
@@ -564,10 +563,9 @@
 
 <div class="app-layout">
 
-    <!-- الجزء الرئيسي للواجهة والمحتوى -->
     <div class="main-content">
 
-        <!-- شريط التنقل العلوي الأنيق -->
+        <!-- شريط التنقل العلوي -->
         <div class="top-navbar">
             <button id="navHomePage" class="nav-tab active" onclick="switchPage('homePage')">🏠 الرئيسية</button>
             <button id="navPasswordPage" class="nav-tab" onclick="switchPage('passwordPage')">🔑 اختبار كلمات السر</button>
@@ -575,7 +573,7 @@
             <button id="navStegoPage" class="nav-tab" onclick="switchPage('stegoPage')">🖼️ إخفاء البيانات بالصور</button>
         </div>
 
-        <!-- الصفحة الرئيسية (Dashboard) -->
+        <!-- الرئيسية -->
         <div id="homePage" class="page-content active">
             <div class="hero-banner">
                 <h1>المنصة التعليمية للأمن السيبراني 🛡️</h1>
@@ -638,14 +636,12 @@
             </div>
         </div>
 
-        <!-- صفحة اختبار كلمة السر -->
+        <!-- صفحة كلمة السر -->
         <div id="passwordPage" class="page-content">
             <div class="card">
                 <h2>مختبر اختراق وتقييم أمان كلمة السر</h2>
                 <div class="form-group">
                     <label>أدخل كلمة السر للاختبار والتحليل الفوري:</label>
-                    
-                    <!-- حقل كلمة السر المضاف إليه زر الإظهار والإخفاء -->
                     <div class="password-field-wrapper">
                         <input type="password" id="passwordInput" oninput="evaluatePassword()" placeholder="اكتب كلمة السر هنا...">
                         <button type="button" class="toggle-password-btn" id="togglePasswordBtn" onclick="togglePasswordVisibility()" title="إظهار/إخفاء كلمة السر">👁️</button>
@@ -688,7 +684,7 @@
             </div>
         </div>
 
-        <!-- صفحة التشفير التعليمي -->
+        <!-- صفحة التشفير -->
         <div id="cipherPage" class="page-content">
             <div class="card">
                 <div class="sub-menu">
@@ -696,14 +692,13 @@
                     <button id="subBtnDecrypt" class="sub-btn" onclick="switchSubMode('decryptMode')">فك تشفير (Decrypt)</button>
                 </div>
 
-                <!-- شريط اختيار نوع الخوارزمية داخل الصفحة -->
                 <div class="cipher-selector-bar">
                     <button class="cipher-select-btn active" onclick="selectCipherType('caesar', this)">Caesar (قيصر)</button>
                     <button class="cipher-select-btn" onclick="selectCipherType('vigenere', this)">Vigenère (فيجينير)</button>
                     <button class="cipher-select-btn" onclick="selectCipherType('rsa', this)">RSA (المفتاح العام)</button>
                 </div>
 
-                <!-- وضع التشفير -->
+                <!-- تشفير -->
                 <div id="encryptMode" class="sub-content active">
                     <div id="panelCaesarEnc" class="cipher-panel active">
                         <div class="form-group">
@@ -751,7 +746,7 @@
                     </div>
                 </div>
 
-                <!-- وضع فك التشفير -->
+                <!-- فك تشفير -->
                 <div id="decryptMode" class="sub-content">
                     <div id="panelCaesarDec" class="cipher-panel active">
                         <div class="form-group">
@@ -800,7 +795,7 @@
             </div>
         </div>
 
-        <!-- صفحة إخفاء البيانات في الصور -->
+        <!-- صفحة إخفاء البيانات -->
         <div id="stegoPage" class="page-content">
             <div class="card">
                 <div class="sub-menu">
@@ -840,7 +835,7 @@
 
     </div>
 
-    <!-- الشريط الجانبي الثابت لـ QR Code بشكل ظاهر وأنيق -->
+    <!-- الشريط الجانبي -->
     <div class="qr-sidebar">
         <div class="qr-card-sticky">
             <h3>📱 الوصول السريع عبر الجوال</h3>
@@ -862,103 +857,88 @@
             colorDark: "#5345ed",
             colorLight: "#ffffff"
         });
-        
-        renderCaesarWheelSVG('caesarWheelEncSVG');
-        renderCaesarWheelSVG('caesarWheelDecSVG');
-        
-        processCipher(true);
+        drawCaesarWheel('caesarWheelEncSVG', 3);
+        drawCaesarWheel('caesarWheelDecSVG', 3);
     });
 
-    // دالة إظهار وإخفاء كلمة السر المضافة
-    function togglePasswordVisibility() {
-        const pwdInput = document.getElementById('passwordInput');
-        const toggleBtn = document.getElementById('togglePasswordBtn');
-        
-        if (pwdInput.type === 'password') {
-            pwdInput.type = 'text';
-            toggleBtn.textContent = '🙈';
-        } else {
-            pwdInput.type = 'password';
-            toggleBtn.textContent = '👁️';
-        }
-    }
-
+    // التنقل بين الصفحات
     function switchPage(pageId) {
         document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
-        
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
         document.getElementById(pageId).classList.add('active');
         
         if(pageId === 'homePage') document.getElementById('navHomePage').classList.add('active');
-        else if(pageId === 'passwordPage') document.getElementById('navPasswordPage').classList.add('active');
-        else if(pageId === 'cipherPage') document.getElementById('navCipherPage').classList.add('active');
-        else if(pageId === 'stegoPage') document.getElementById('navStegoPage').classList.add('active');
+        if(pageId === 'passwordPage') document.getElementById('navPasswordPage').classList.add('active');
+        if(pageId === 'cipherPage') document.getElementById('navCipherPage').classList.add('active');
+        if(pageId === 'stegoPage') document.getElementById('navStegoPage').classList.add('active');
     }
 
     function switchSubMode(modeId) {
-        document.querySelectorAll('#cipherPage .sub-content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('#cipherPage .sub-content').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('#cipherPage .sub-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(modeId).classList.add('active');
-        if(modeId === 'encryptMode') {
-            document.getElementById('subBtnEncrypt').classList.add('active');
-            processCipher(true);
-        } else {
-            document.getElementById('subBtnDecrypt').classList.add('active');
-            processCipher(false);
-        }
+        if(modeId === 'encryptMode') document.getElementById('subBtnEncrypt').classList.add('active');
+        if(modeId === 'decryptMode') document.getElementById('subBtnDecrypt').classList.add('active');
+        processCipher(modeId === 'encryptMode');
     }
 
     function switchStegoSubMode(modeId) {
-        document.querySelectorAll('#stegoPage .sub-content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('#stegoPage .sub-content').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('#stegoPage .sub-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(modeId).classList.add('active');
-        if(modeId === 'stegoEncryptMode') {
-            document.getElementById('subBtnStegoEncrypt').classList.add('active');
-        } else {
-            document.getElementById('subBtnStegoDecrypt').classList.add('active');
-        }
+        if(modeId === 'stegoEncryptMode') document.getElementById('subBtnStegoEncrypt').classList.add('active');
+        if(modeId === 'stegoDecryptMode') document.getElementById('subBtnStegoDecrypt').classList.add('active');
     }
 
-    function selectCipherType(type, btnElem) {
+    function selectCipherType(type, btn) {
         selectedCipher = type;
         document.querySelectorAll('.cipher-select-btn').forEach(b => b.classList.remove('active'));
-        btnElem.classList.add('active');
+        btn.classList.add('active');
 
-        // إخفاء كافة الواجهات الخاصة بالخوارزميات
         document.querySelectorAll('.cipher-panel').forEach(p => p.classList.remove('active'));
-
-        // إظهار اللوحة المطلوبة
-        if(type === 'caesar') {
-            document.getElementById('panelCaesarEnc').classList.add('active');
-            document.getElementById('panelCaesarDec').classList.add('active');
-        } else if(type === 'vigenere') {
-            document.getElementById('panelVigenereEnc').classList.add('active');
-            document.getElementById('panelVigenereDec').classList.add('active');
-        } else if(type === 'rsa') {
-            document.getElementById('panelRsaEnc').classList.add('active');
-            document.getElementById('panelRsaDec').classList.add('active');
-        }
-
-        const isEncrypting = document.getElementById('encryptMode').classList.contains('active');
-        processCipher(isEncrypting);
+        const isEnc = document.getElementById('encryptMode').classList.contains('active');
+        const prefix = isEnc ? 'panel' : 'panel';
+        const suffix = isEnc ? 'Enc' : 'Dec';
+        
+        const targetId = prefix + type.charAt(0).toUpperCase() + type.slice(1) + suffix;
+        const targetPanel = document.getElementById(targetId);
+        if(targetPanel) targetPanel.classList.add('active');
+        
+        processCipher(isEnc);
     }
 
-    /* --- وظائف تقييم كلمات المرور --- */
+    function togglePasswordVisibility() {
+        const input = document.getElementById('passwordInput');
+        const btn = document.getElementById('togglePasswordBtn');
+        if (input.type === 'password') {
+            input.type = 'text';
+            btn.textContent = '🙈';
+        } else {
+            input.type = 'password';
+            btn.textContent = '👁️';
+        }
+    }
+
+    // ==========================================
+    // دالة تقييم كلمة السر المصححة
+    // ==========================================
     function evaluatePassword() {
         const pwd = document.getElementById('passwordInput').value;
-        const timeResult = document.getElementById('crackTimeResult');
-        const bar = document.getElementById('strengthBar');
-        const feedback = document.getElementById('passwordFeedback');
+        const timeResultSpan = document.getElementById('crackTimeResult');
+        const strengthBar = document.getElementById('strengthBar');
+        const feedbackDiv = document.getElementById('passwordFeedback');
         const scoreBadge = document.getElementById('scoreBadge');
         const analysisSection = document.getElementById('analysisSection');
         const strengthsList = document.getElementById('strengthsList');
         const weaknessesList = document.getElementById('weaknessesList');
 
         if (!pwd) {
-            timeResult.innerText = "بانتظار المدخلات...";
-            bar.style.width = "0%";
-            feedback.innerText = "أدخل كلمة سر للتحليل...";
-            scoreBadge.innerText = "0/100";
+            timeResultSpan.textContent = 'بانتظار المدخلات...';
+            strengthBar.style.width = '0%';
+            strengthBar.style.backgroundColor = '#e4e6eb';
+            feedbackDiv.textContent = 'أدخل كلمة سر للتحليل...';
+            feedbackDiv.style.color = 'var(--text-main)';
+            scoreBadge.textContent = '0/100';
             analysisSection.style.display = 'none';
             return;
         }
@@ -967,225 +947,308 @@
         strengthsList.innerHTML = '';
         weaknessesList.innerHTML = '';
 
-        let score = 0;
+        // حساب حجم الأبجدية المستخدمة (Pool Size)
         let poolSize = 0;
+        const hasLower = /[a-z]/.test(pwd);
+        const hasUpper = /[A-Z]/.test(pwd);
+        const hasDigits = /[0-9]/.test(pwd);
+        const hasSymbols = /[^a-zA-Z0-9]/.test(pwd);
 
-        if (/[a-z]/.test(pwd)) { score += 15; poolSize += 26; strengthsList.innerHTML += '<li>• تحوي أحرف صغيرة (a-z)</li>'; }
-        else { weaknessesList.innerHTML += '<li>• أضف أحرفاً صغيرة لتعقيد التخمين</li>'; }
+        if (hasLower) poolSize += 26;
+        if (hasUpper) poolSize += 26;
+        if (hasDigits) poolSize += 10;
+        if (hasSymbols) poolSize += 33;
 
-        if (/[A-Z]/.test(pwd)) { score += 20; poolSize += 26; strengthsList.innerHTML += '<li>• تحوي أحرف كبيرة (A-Z)</li>'; }
-        else { weaknessesList.innerHTML += '<li>• أضف أحرفاً كبيرة (Capital Letters)</li>'; }
-
-        if (/[0-9]/.test(pwd)) { score += 15; poolSize += 10; strengthsList.innerHTML += '<li>• تحوي أرقاماً عدادية (0-9)</li>'; }
-        else { weaknessesList.innerHTML += '<li>• أدخل أرقاماً جيدة لتشتيت المخترق</li>'; }
-
-        if (/[^a-zA-Z0-9]/.test(pwd)) { score += 25; poolSize += 32; strengthsList.innerHTML += '<li>• تحوي رموزاً خاصة (@, #, $, ...)</li>'; }
-        else { weaknessesList.innerHTML += '<li>• أضف رموزاً خاصة لرفع القوة بشكل مضاعف</li>'; }
-
-        if (pwd.length >= 8) { score += 25; strengthsList.innerHTML += `<li>• الطول مناسب (${pwd.length} حرفاً)</li>`; }
-        else { weaknessesList.innerHTML += `<li>• كلمة السر قصيرة جداً (${pwd.length} حروف فقط)</li>`; }
-
-        bar.style.width = Math.min(score, 100) + '%';
-        scoreBadge.innerText = Math.min(score, 100) + '/100';
-
-        if (score < 40) {
-            bar.style.backgroundColor = 'var(--accent-red)';
-            feedback.innerText = 'ضعيفة جداً - سهلة الاختراق ❌';
-            feedback.style.color = 'var(--accent-red)';
-        } else if (score < 75) {
-            bar.style.backgroundColor = '#f59e0b';
-            feedback.innerText = 'متوسطة الأمان ⚠️';
-            feedback.style.color = '#f59e0b';
-        } else {
-            bar.style.backgroundColor = 'var(--accent-green)';
-            feedback.innerText = 'قوية وممتازة 🔒';
-            feedback.style.color = 'var(--accent-green)';
-        }
-
-        // حساب وقت الكسر
-        if (poolSize === 0) return;
+        // حساب عدد التخمينات المحتملة = poolSize ^ length
         const combinations = Math.pow(poolSize, pwd.length);
-        const guessesPerSec = 1e10; // 10 مليار محاولة بالثانية
-        const seconds = combinations / guessesPerSec;
+        
+        // افتراض قدرة المهاجم: 10 مليار تخمين/ثانية (10,000,000,000)
+        const secondsToCrack = combinations / 10000000000;
 
-        if (seconds < 1) timeResult.innerText = "أقل من ثانية واحدة (لحظياً!)";
-        else if (seconds < 60) timeResult.innerText = Math.round(seconds) + " ثوانٍ";
-        else if (seconds < 3600) timeResult.innerText = Math.round(seconds / 60) + " دقائق";
-        else if (seconds < 86400) timeResult.innerText = Math.round(seconds / 3600) + " ساعات";
-        else if (seconds < 31536000) timeResult.innerText = Math.round(seconds / 86400) + " أيام";
-        else if (seconds < 31536000000) timeResult.innerText = Math.round(seconds / 31536000) + " سنوات";
-        else timeResult.innerText = "ملايين القرون! 🔒";
-    }
+        // تحديد نص الوقت
+        const timeText = formatTime(secondsToCrack);
+        timeResultSpan.textContent = timeText;
 
-    /* --- رسم عجلة قيصر SVG التفاعلية --- */
-    function renderCaesarWheelSVG(svgId) {
-        const svg = document.getElementById(svgId);
-        if(!svg) return;
-        svg.innerHTML = '';
-
-        const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        const center = 150;
-        const outerR = 135;
-        const innerR = 95;
-
-        // الحلقة الخارجية
-        let html = `<circle cx="${center}" cy="${center}" r="${outerR}" class="wheel-outer-circle" />`;
-        html += `<circle cx="${center}" cy="${center}" r="${innerR}" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2" />`;
-
-        // الحروف الخارجية
-        for(let i = 0; i < 26; i++) {
-            const angle = (i * 360 / 26) - 90;
-            const rad = angle * Math.PI / 180;
-            const x = center + (outerR - 18) * Math.cos(rad);
-            const y = center + (outerR - 18) * Math.sin(rad);
-            html += `<text x="${x}" y="${y}" class="wheel-text-outer">${alphabet[i]}</text>`;
+        // تحليل النقاط والضعف والقوة
+        let score = 0;
+        
+        if (pwd.length >= 8) {
+            score += 20;
+            addListItem(strengthsList, `الطول جيد (${pwd.length} حرفاً).`);
+        } else {
+            addListItem(weaknessesList, 'قصيرة جداً (أقل من 8 أحرف).');
         }
 
-        // القرص الداخلي الدوار
-        html += `<g id="${svgId}_innerGroup" class="wheel-inner-group">`;
-        html += `<circle cx="${center}" cy="${center}" r="${innerR - 5}" fill="#ffffff" stroke="#5345ed" stroke-width="2" />`;
+        if (pwd.length >= 12) score += 15;
 
-        for(let i = 0; i < 26; i++) {
-            const angle = (i * 360 / 26) - 90;
-            const rad = angle * Math.PI / 180;
-            const x = center + (innerR - 22) * Math.cos(rad);
-            const y = center + (innerR - 22) * Math.sin(rad);
-            html += `<text x="${x}" y="${y}" class="wheel-text-inner">${alphabet[i]}</text>`;
+        if (hasLower) { score += 15; addListItem(strengthsList, 'تحتوي على أحرف صغيرة.'); }
+        else { addListItem(weaknessesList, 'أضف أحرفاً صغيرة (a-z).'); }
+
+        if (hasUpper) { score += 15; addListItem(strengthsList, 'تحتوي على أحرف كبيرة.'); }
+        else { addListItem(weaknessesList, 'أضف أحرفاً كبيرة (A-Z).'); }
+
+        if (hasDigits) { score += 15; addListItem(strengthsList, 'تحتوي على أرقام.'); }
+        else { addListItem(weaknessesList, 'أضف أرقاماً (0-9).'); }
+
+        if (hasSymbols) { score += 20; addListItem(strengthsList, 'تحتوي على رموز خاصة.'); }
+        else { addListItem(weaknessesList, 'أضف رموزاً خاصة (!@#$).'); }
+
+        // إذا كان وقت الاختراق خرافياً (تجاوز ترليون سنة)، يتم إعطاء الدرجة الكاملة فوراً!
+        const ONE_TRILLION_YEARS_IN_SECONDS = 3.154e19;
+        if (secondsToCrack >= ONE_TRILLION_YEARS_IN_SECONDS || timeText === '+1trilion year') {
+            score = 100;
         }
-        html += `</g>`;
 
-        svg.innerHTML = html;
+        score = Math.min(100, score);
+        scoreBadge.textContent = `${score}/100`;
+        strengthBar.style.width = `${score}%`;
+
+        // تصنيف الأمان بناءً على الدرجة والزمن
+        if (score < 40 || secondsToCrack < 60) {
+            strengthBar.style.backgroundColor = 'var(--accent-red)';
+            feedbackDiv.textContent = 'ضعيفة جداً ⚠️';
+            feedbackDiv.style.color = 'var(--accent-red)';
+        } else if (score < 75 || secondsToCrack < 86400 * 365) {
+            strengthBar.style.backgroundColor = '#f59e0b'; // برتقالي
+            feedbackDiv.textContent = 'متوسطة 🟡';
+            feedbackDiv.style.color = '#d97706';
+        } else if (score < 90 && secondsToCrack < ONE_TRILLION_YEARS_IN_SECONDS) {
+            strengthBar.style.backgroundColor = '#10b981'; // أخضر
+            feedbackDiv.textContent = 'قوية 🔒';
+            feedbackDiv.style.color = '#10b981';
+        } else {
+            strengthBar.style.backgroundColor = '#059669'; // أخضر داكن
+            feedbackDiv.textContent = 'قوية جداً 🛡️';
+            feedbackDiv.style.color = '#059669';
+        }
     }
 
-    function rotateCaesarWheel(shift, isEnc) {
-        const encGroup = document.getElementById('caesarWheelEncSVG_innerGroup');
-        const decGroup = document.getElementById('caesarWheelDecSVG_innerGroup');
-
-        const degrees = (shift % 26) * (360 / 26);
-        const rotationAngle = isEnc ? -degrees : degrees;
-
-        if(encGroup) encGroup.style.transform = `rotate(${rotationAngle}deg)`;
-        if(decGroup) decGroup.style.transform = `rotate(${rotationAngle}deg)`;
+    function addListItem(ul, text) {
+        const li = document.createElement('li');
+        li.textContent = text;
+        ul.appendChild(li);
     }
 
-    /* --- منطق التشفير وفك التشفير --- */
+    // دالة تنسيق الوقت المصححة بالكامل
+    function formatTime(seconds) {
+        if (seconds < 1) return 'أقل من ثانية واحدة (فوري)';
+        if (seconds < 60) return `${Math.floor(seconds)} ثوانٍ`;
+        
+        const minutes = seconds / 60;
+        if (minutes < 60) return `${Math.floor(minutes)} دقيقة`;
+        
+        const hours = minutes / 60;
+        if (hours < 24) return `${Math.floor(hours)} ساعة`;
+        
+        const days = hours / 24;
+        if (days < 365) return `${Math.floor(days)} يوم`;
+        
+        const years = days / 365.25;
+        if (years < 100) return `${Math.floor(years)} سنة`;
+        if (years < 1000) return `${Math.floor(years / 100)} قرن`;
+        if (years < 1000000) return `${Math.floor(years / 1000)} ألف سنة`;
+        if (years < 1000000000) return `${Math.floor(years / 1000000)} مليون سنة`;
+        if (years < 1000000000000) return `${Math.floor(years / 1000000000)} مليار سنة`;
+        
+        // النص المطلوب للكلمات الخارقة
+        return '+1trilion year';
+    }
+
+    // ==========================================
+    // التشفير وفك التشفير (Caesar, Vigenere, RSA)
+    // ==========================================
     function processCipher(isEncrypt) {
         const suffix = isEncrypt ? 'Enc' : 'Dec';
-        const inputStr = document.getElementById('cipherInput' + suffix).value;
-        const outputElem = document.getElementById('cipherOutput' + suffix);
-        const stepsElem = document.getElementById('stepsList' + suffix);
+        const inputVal = document.getElementById('cipherInput' + suffix).value;
+        const outputDiv = document.getElementById('cipherOutput' + suffix);
+        const stepsDiv = document.getElementById('stepsList' + suffix);
         const eduSection = document.getElementById('eduSection' + suffix);
 
-        if(!inputStr) {
-            outputElem.innerText = '--';
+        if(!inputVal) {
+            outputDiv.textContent = '--';
             eduSection.style.display = 'none';
             return;
         }
 
-        let resultText = '';
-        let stepsHTML = '';
+        let result = '';
+        let steps = [];
 
-        if(selectedCipher === 'caesar') {
-            const key = parseInt(document.getElementById('caesarKey' + suffix).value) || 0;
-            rotateCaesarWheel(key, isEncrypt);
+        if (selectedCipher === 'caesar') {
+            const shift = parseInt(document.getElementById('caesarKey' + suffix).value) || 0;
+            drawCaesarWheel('caesarWheel' + suffix + 'SVG', shift);
 
-            for(let i = 0; i < inputStr.length; i++) {
-                let char = inputStr[i];
-                if(char.match(/[a-z]/i)) {
-                    let code = inputStr.charCodeAt(i);
+            for (let i = 0; i < inputVal.length; i++) {
+                let char = inputVal[i];
+                if (char.match(/[a-z]/i)) {
+                    let code = inputVal.charCodeAt(i);
                     let base = (code >= 65 && code <= 90) ? 65 : 97;
-                    let shift = isEncrypt ? key : -key;
-                    let newCode = (code - base + shift) % 26;
-                    if(newCode < 0) newCode += 26;
-                    let newChar = String.fromCharCode(newCode + base);
-                    resultText += newChar;
-                    stepsHTML += `<div class="step-item"><span class="step-badge">${i+1}</span> الحرف '${char}' ➔ الإزاحة (${isEncrypt?'+':'-'}${key}) ➔ الناتج '${newChar}'</div>`;
+                    let actualShift = isEncrypt ? shift : -shift;
+                    let newCode = ((code - base + actualShift) % 26 + 26) % 26 + base;
+                    let newChar = String.fromCharCode(newCode);
+                    result += newChar;
+                    steps.push(`الحرف '${char}' → إزاحة (${actualShift > 0 ? '+' + actualShift : actualShift}) → الحرف '${newChar}'`);
                 } else {
-                    resultText += char;
+                    result += char;
                 }
             }
-        } else if(selectedCipher === 'vigenere') {
-            const keyStr = document.getElementById('vigenereKey' + suffix).value || 'KEY';
+        } else if (selectedCipher === 'vigenere') {
+            const key = document.getElementById('vigenereKey' + suffix).value.toUpperCase() || 'A';
             let keyIndex = 0;
 
-            for(let i = 0; i < inputStr.length; i++) {
-                let char = inputStr[i];
-                if(char.match(/[a-z]/i)) {
+            for (let i = 0; i < inputVal.length; i++) {
+                let char = inputVal[i];
+                if (char.match(/[a-z]/i)) {
                     let isUpper = (char === char.toUpperCase());
                     let pCode = char.toUpperCase().charCodeAt(0) - 65;
-                    let kCode = keyStr[keyIndex % keyStr.length].toUpperCase().charCodeAt(0) - 65;
-                    let resCode = isEncrypt ? (pCode + kCode) % 26 : (pCode - kCode + 26) % 26;
-                    let newChar = String.fromCharCode(resCode + 65);
-                    if(!isUpper) newChar = newChar.toLowerCase();
-
-                    resultText += newChar;
-                    stepsHTML += `<div class="step-item"><span class="step-badge">${i+1}</span> الحرف '${char}' مع المفتاح '${keyStr[keyIndex % keyStr.length]}' ➔ الناتج '${newChar}'</div>`;
+                    let kCode = key[keyIndex % key.length].charCodeAt(0) - 65;
+                    let cCode = isEncrypt ? (pCode + kCode) % 26 : (pCode - kCode + 26) % 26;
+                    let newChar = String.fromCharCode(cCode + 65);
+                    if (!isUpper) newChar = newChar.toLowerCase();
+                    result += newChar;
+                    steps.push(`الحرف '${char}' مع المفتاح '${key[keyIndex % key.length]}' → الحرف '${newChar}'`);
                     keyIndex++;
                 } else {
-                    resultText += char;
+                    result += char;
                 }
             }
-        } else if(selectedCipher === 'rsa') {
+        } else if (selectedCipher === 'rsa') {
             const p = parseInt(document.getElementById('rsaP' + suffix).value) || 61;
             const q = parseInt(document.getElementById('rsaQ' + suffix).value) || 53;
             const e = parseInt(document.getElementById('rsaE' + suffix).value) || 17;
-            
+
             const n = p * q;
             const phi = (p - 1) * (q - 1);
             let d = modInverse(e, phi);
 
-            stepsHTML += `<div class="step-item"><span class="step-badge">N</span> حساب المتغير N = P × Q = ${n}</div>`;
-            stepsHTML += `<div class="step-item"><span class="step-badge">Φ</span> حساب معامل أويلر Φ(N) = ${phi}</div>`;
+            steps.push(`حساب القيم: N = ${n}, φ(N) = ${phi}, d = ${d}`);
 
-            if(isEncrypt) {
+            if (isEncrypt) {
                 let cipherNums = [];
-                for(let i = 0; i < inputStr.length; i++) {
-                    let m = inputStr.charCodeAt(i);
-                    let c = bigIntPowMod(BigInt(m), BigInt(e), BigInt(n));
-                    cipherNums.push(c.toString());
+                for (let i = 0; i < inputVal.length; i++) {
+                    let m = inputVal.charCodeAt(i);
+                    let c = powerMod(m, e, n);
+                    cipherNums.push(c);
+                    steps.push(`تشفير الحرف '${inputVal[i]}' (${m}): (${m}^${e}) mod ${n} = ${c}`);
                 }
-                resultText = cipherNums.join(' ');
+                result = cipherNums.join(' ');
             } else {
-                let arr = inputStr.trim().split(' ');
-                for(let i = 0; i < arr.length; i++) {
-                    let c = parseInt(arr[i]);
-                    if(!isNaN(c)) {
-                        let m = bigIntPowMod(BigInt(c), BigInt(d), BigInt(n));
-                        resultText += String.fromCharCode(Number(m));
+                let nums = inputVal.trim().split(/\s+/);
+                for (let i = 0; i < nums.length; i++) {
+                    let c = parseInt(nums[i]);
+                    if (!isNaN(c)) {
+                        let m = powerMod(c, d, n);
+                        let char = String.fromCharCode(m);
+                        result += char;
+                        steps.push(`فك تشفير الرقم ${c}: (${c}^${d}) mod ${n} = ${m} ('${char}')`);
                     }
                 }
             }
         }
 
-        outputElem.innerText = resultText;
-        if(stepsHTML) {
-            eduSection.style.display = 'block';
-            stepsElem.innerHTML = stepsHTML;
-        } else {
-            eduSection.style.display = 'none';
-        }
+        outputDiv.textContent = result;
+        eduSection.style.display = 'block';
+        stepsDiv.innerHTML = steps.map((s, idx) => `
+            <div class="step-item">
+                <span class="step-badge">${idx + 1}</span>
+                <div>${s}</div>
+            </div>
+        `).join('');
     }
 
-    function modInverse(a, m) {
-        a = (a % m + m) % m;
-        for (let x = 1; x < m; x++) {
-            if ((a * x) % m == 1) return x;
-        }
-        return 1;
-    }
-
-    function bigIntPowMod(base, exp, mod) {
-        let res = BigInt(1);
+    // دوال خوارزمية RSA المساعدة
+    function powerMod(base, exp, mod) {
+        let res = 1;
         base = base % mod;
         while (exp > 0) {
-            if (exp % BigInt(2) === BigInt(1)) res = (res * base) % mod;
+            if (exp % 2 === 1) res = (res * base) % mod;
             base = (base * base) % mod;
-            exp = exp / BigInt(2);
+            exp = Math.floor(exp / 2);
         }
         return res;
     }
 
-    /* --- منطق إخفاء واستخراج الرسائل بالصور (Steganography) --- */
+    function modInverse(e, phi) {
+        let m0 = phi, y = 0, x = 1;
+        if (phi === 1) return 0;
+        while (e > 1) {
+            let q = Math.floor(e / phi);
+            let t = phi;
+            phi = e % phi; e = t;
+            t = y;
+            y = x - q * y;
+            x = t;
+        }
+        if (x < 0) x += m0;
+        return x;
+    }
+
+    // رسم عجلة قيصر
+    function drawCaesarWheel(svgId, shift) {
+        const svg = document.getElementById(svgId);
+        if(!svg) return;
+        svg.innerHTML = '';
+
+        const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        const total = 26;
+        const cx = 150, cy = 150, rOuter = 125, rInner = 85;
+
+        // القرص الخارجي
+        const outerCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        outerCircle.setAttribute("cx", cx);
+        outerCircle.setAttribute("cy", cy);
+        outerCircle.setAttribute("r", rOuter);
+        outerCircle.setAttribute("class", "wheel-outer-circle");
+        svg.appendChild(outerCircle);
+
+        for (let i = 0; i < total; i++) {
+            let angle = (i * 360 / total) - 90;
+            let rad = angle * Math.PI / 180;
+            let x = cx + (rOuter - 15) * Math.cos(rad);
+            let y = cy + (rOuter - 15) * Math.sin(rad);
+
+            let txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            txt.setAttribute("x", x);
+            txt.setAttribute("y", y);
+            txt.setAttribute("class", "wheel-text-outer");
+            txt.textContent = alphabet[i];
+            svg.appendChild(txt);
+        }
+
+        // القرص الداخلي المائل
+        const innerGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        innerGroup.setAttribute("class", "wheel-inner-group");
+        let rotAngle = (shift % 26) * (360 / total);
+        innerGroup.setAttribute("style", `transform: rotate(${-rotAngle}deg); transform-origin: 150px 150px;`);
+
+        const innerCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        innerCircle.setAttribute("cx", cx);
+        innerCircle.setAttribute("cy", cy);
+        innerCircle.setAttribute("r", rInner);
+        innerCircle.setAttribute("fill", "#eeebff");
+        innerCircle.setAttribute("stroke", "#5345ed");
+        innerCircle.setAttribute("stroke-width", "2");
+        innerGroup.appendChild(innerCircle);
+
+        for (let i = 0; i < total; i++) {
+            let angle = (i * 360 / total) - 90;
+            let rad = angle * Math.PI / 180;
+            let x = cx + (rInner - 15) * Math.cos(rad);
+            let y = cy + (rInner - 15) * Math.sin(rad);
+
+            let txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            txt.setAttribute("x", x);
+            txt.setAttribute("y", y);
+            txt.setAttribute("class", "wheel-text-inner");
+            txt.textContent = alphabet[i];
+            innerGroup.appendChild(txt);
+        }
+
+        svg.appendChild(innerGroup);
+    }
+
+    // ==========================================
+    // Steganography (إخفاء النصوص في الصور)
+    // ==========================================
     function handleImage(e, canvasId) {
         const reader = new FileReader();
         reader.onload = function(event) {
@@ -1207,37 +1270,38 @@
         const ctx = canvas.getContext('2d');
         const msg = document.getElementById('stegoMessageEnc').value;
 
-        if(!canvas.width || !msg) {
-            alert('يرجى اختيار صورة واكتب رسالة للإخفاء!');
+        if (!msg || canvas.width === 0) {
+            alert('الرجاء اختيار صورة وكتابة رسالة أولاً!');
             return;
         }
 
         const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const data = imgData.data;
 
-        // تحويل النص إلى باينري
-        let binaryMsg = '';
-        for (let i = 0; i < msg.length; i++) {
-            let bin = msg.charCodeAt(i).toString(2);
-            binaryMsg += '0'.repeat(8 - bin.length) + bin;
+        // تحويل النص إلى باينري إضافة مع علامة نهاية النص "###"
+        const fullMsg = msg + "###";
+        let binaryMsg = "";
+        for (let i = 0; i < fullMsg.length; i++) {
+            let bin = fullMsg.charCodeAt(i).toString(2);
+            binaryMsg += "0".repeat(8 - bin.length) + bin;
         }
-        binaryMsg += '00000000'; // نهاية النص Null Terminator
 
         if (binaryMsg.length > data.length / 4) {
-            alert('حجم الرسالة كبير جداً بالنسبة لهذه الصورة!');
+            alert('حجم الصورة صغير جداً بالنسبة لهذه الرسالة!');
             return;
         }
 
         for (let i = 0; i < binaryMsg.length; i++) {
+            // إخفاء بت واحد في البت الأقل أهمية (LSB) للون الأحمر لكل بكسل
             data[i * 4] = (data[i * 4] & 0xFE) | parseInt(binaryMsg[i]);
         }
 
         ctx.putImageData(imgData, 0, 0);
 
-        // تنزيل الصورة الناتجة
+        // تحميل الصورة الجديدة
         const link = document.createElement('a');
-        link.download = 'stego-image.png';
-        link.href = canvas.toDataURL('image/png');
+        link.download = 'stego_image.png';
+        link.href = canvas.toDataURL();
         link.click();
     }
 
@@ -1246,28 +1310,34 @@
         const ctx = canvas.getContext('2d');
         const output = document.getElementById('stegoOutputDec');
 
-        if(!canvas.width) {
-            alert('يرجى رفع الصورة المحملة بالرسالة أولاً!');
+        if (canvas.width === 0) {
+            alert('الرجاء رفع صورة أولاً!');
             return;
         }
 
         const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const data = imgData.data;
 
-        let binaryMsg = '';
-        for (let i = 0; i < data.length; i += 4) {
-            binaryMsg += (data[i] & 1).toString();
+        let binaryMsg = "";
+        let extractedText = "";
+
+        for (let i = 0; i < data.length / 4; i++) {
+            binaryMsg += (data[i * 4] & 1).toString();
+
+            if (binaryMsg.length === 8) {
+                let charCode = parseInt(binaryMsg, 2);
+                let char = String.fromCharCode(charCode);
+                extractedText += char;
+                binaryMsg = "";
+
+                if (extractedText.endsWith("###")) {
+                    output.textContent = extractedText.slice(0, -3);
+                    return;
+                }
+            }
         }
 
-        let hiddenText = '';
-        for (let i = 0; i < binaryMsg.length; i += 8) {
-            let byte = binaryMsg.substr(i, 8);
-            if (byte === '00000000') break;
-            hiddenText += String.fromCharCode(parseInt(byte, 2));
-        }
-
-        output.innerText = hiddenText ? hiddenText : "لم يتم العثور على رسالة مخفية!";
-        output.style.color = hiddenText ? "var(--accent-green)" : "var(--accent-red)";
+        output.textContent = "لم يتم العثور على رسالة مخفية أو أن النص تالف.";
     }
 </script>
 
